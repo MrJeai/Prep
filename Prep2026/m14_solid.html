@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 3 · M14 — SOLID Principles</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 3 · Module 14</div>
+    <h1>SOLID Principles</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — What SOLID Is</a>
+  <a class="nav-item" href="#ch2">02 — S · Single Responsibility</a>
+  <a class="nav-item" href="#ch3">03 — O · Open/Closed</a>
+  <a class="nav-item" href="#ch4">04 — L · Liskov Substitution</a>
+  <a class="nav-item" href="#ch5">05 — I · Interface Segregation</a>
+  <a class="nav-item" href="#ch6">06 — D · Dependency Inversion</a>
+  <a class="nav-item" href="#ch7">07 — Interview Prep</a>
+  <a class="nav-item" href="#ch8">08 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 3 — Module 14 · Design Principles</div>
+    <h1>SOLID Principles</h1>
+    <p>SOLID is interview gold — especially in LLD rounds, where you're expected not just to name the five principles but to apply them to a design. This module takes each one with a concrete before/after in C#, so you can explain the smell it prevents and recognise it in real code.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> OOP Design</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 3 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>What SOLID Is</h2><div class="ch-sub">Five principles for code that's easy to change</div></div></div>
+    <div class="section">
+      <p><strong>SOLID</strong> is five object-oriented design principles (coined by Robert C. Martin) that together make code easier to maintain, extend, and test. They're not rules to follow blindly — they're guidelines that fight specific kinds of fragility.</p>
+      <table class="comp-table">
+        <tr><th>Letter</th><th>Principle</th><th>One-line idea</th></tr>
+        <tr><td><strong>S</strong></td><td>Single Responsibility</td><td>A class should have one reason to change.</td></tr>
+        <tr><td><strong>O</strong></td><td>Open/Closed</td><td>Open for extension, closed for modification.</td></tr>
+        <tr><td><strong>L</strong></td><td>Liskov Substitution</td><td>Subtypes must be usable as their base type.</td></tr>
+        <tr><td><strong>I</strong></td><td>Interface Segregation</td><td>Many small interfaces beat one fat one.</td></tr>
+        <tr><td><strong>D</strong></td><td>Dependency Inversion</td><td>Depend on abstractions, not concretions.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>S — Single Responsibility</h2><div class="ch-sub">One class, one reason to change</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 Principle</div>A class should have <strong>one responsibility</strong> — one reason to change. If a class does report generation <em>and</em> emailing <em>and</em> saving, three unrelated forces can break it.</div>
+      <div class="mistakes-grid">
+        <div class="mistake-item"><div class="mistake-icon">❌</div><div class="mistake-body"><div class="mistake-title">Violation</div><div class="mistake-desc"><code class="inline">InvoiceService</code> calculates totals, formats a PDF, <em>and</em> sends email.</div><div class="mistake-fix">→ A change to email logic risks breaking invoice math.</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">✅</div><div class="mistake-body"><div class="mistake-title">Fix</div><div class="mistake-desc">Split into <code class="inline">InvoiceCalculator</code>, <code class="inline">PdfRenderer</code>, <code class="inline">EmailSender</code>.</div><div class="mistake-fix">→ Each changes for one reason; each is independently testable.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>O — Open/Closed</h2><div class="ch-sub">Extend behaviour without editing existing code</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 Principle</div>Software should be <strong>open for extension but closed for modification</strong>. You add new behaviour by adding new code, not by editing tested, working code.</div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">❌ violation — must edit on every new type</span></div><pre><span class="kw">decimal</span> <span class="meth">Discount</span>(<span class="type">Customer</span> c) {
+  <span class="kw">if</span> (c.Type == <span class="str">"Regular"</span>) <span class="kw">return</span> <span class="num">0</span>;
+  <span class="kw">if</span> (c.Type == <span class="str">"Premium"</span>) <span class="kw">return</span> <span class="num">0.1m</span>;  <span class="cmt">// new type ⇒ edit this method</span>
+}</pre></div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">✅ fix — add a class, don't touch the rest</span></div><pre><span class="kw">interface</span> <span class="type">IDiscount</span> { <span class="kw">decimal</span> <span class="meth">Rate</span>(); }
+<span class="kw">class</span> <span class="type">Premium</span> : <span class="type">IDiscount</span> { <span class="kw">public decimal</span> <span class="meth">Rate</span>() =&gt; <span class="num">0.1m</span>; }
+<span class="cmt">// add Vip : IDiscount later — existing code untouched</span></pre></div>
+      <div class="callout tip"><div class="callout-label">💡 Note</div>Open/Closed is usually achieved with abstraction + polymorphism (interfaces, inheritance, the Strategy pattern from Module 15).</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>L — Liskov Substitution</h2><div class="ch-sub">A subtype must honour the base type's contract</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 Principle</div>Objects of a subclass must be <strong>substitutable for their base class</strong> without breaking the program. A subtype that can't do what its base promises violates LSP.</div>
+      <div class="mistakes-grid">
+        <div class="mistake-item"><div class="mistake-icon">❌</div><div class="mistake-body"><div class="mistake-title">The classic violation</div><div class="mistake-desc"><code class="inline">Square : Rectangle</code> — setting Width also forces Height, breaking code that assumed independent sides. Or <code class="inline">Ostrich : Bird</code> with a <code class="inline">Fly()</code> that throws.</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">✅</div><div class="mistake-body"><div class="mistake-title">Fix</div><div class="mistake-desc">Don't force an "is-a" that breaks the contract. Model capabilities with separate abstractions (e.g. <code class="inline">IFlyingBird</code>) instead of inheriting behaviour a subtype can't fulfil.</div></div></div>
+      </div>
+      <div class="callout warning"><div class="callout-label">⚠️ The signal</div>If a subclass overrides a method to throw <code class="inline">NotSupportedException</code>, or callers must check the concrete type, LSP is being violated.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>I — Interface Segregation</h2><div class="ch-sub">Don't force clients to depend on methods they don't use</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 Principle</div>Prefer <strong>many small, focused interfaces</strong> over one large "fat" interface. A class shouldn't be forced to implement methods it doesn't need.</div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre><span class="cmt">// ❌ fat interface — a SimplePrinter is forced to implement Scan/Fax</span>
+<span class="kw">interface</span> <span class="type">IMachine</span> { <span class="kw">void</span> <span class="meth">Print</span>(); <span class="kw">void</span> <span class="meth">Scan</span>(); <span class="kw">void</span> <span class="meth">Fax</span>(); }
+
+<span class="cmt">// ✅ segregated — implement only what applies</span>
+<span class="kw">interface</span> <span class="type">IPrinter</span> { <span class="kw">void</span> <span class="meth">Print</span>(); }
+<span class="kw">interface</span> <span class="type">IScanner</span> { <span class="kw">void</span> <span class="meth">Scan</span>(); }</pre></div>
+    </div>
+  </div>
+
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>D — Dependency Inversion</h2><div class="ch-sub">High-level code shouldn't depend on low-level details</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 Principle</div>High-level modules and low-level modules should both <strong>depend on abstractions</strong>, not on each other. Abstractions shouldn't depend on details; details depend on abstractions.</div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre><span class="cmt">// ❌ OrderService depends on a concrete SqlOrderRepo</span>
+<span class="kw">class</span> <span class="type">OrderService</span> { <span class="type">SqlOrderRepo</span> _r = <span class="kw">new</span>(); }
+
+<span class="cmt">// ✅ depend on the interface; the concrete is injected (Module 5)</span>
+<span class="kw">class</span> <span class="type">OrderService</span> {
+  <span class="kw">private readonly</span> <span class="type">IOrderRepo</span> _r;
+  <span class="kw">public</span> <span class="meth">OrderService</span>(<span class="type">IOrderRepo</span> r) =&gt; _r = r;
+}</pre></div>
+      <div class="callout tip"><div class="callout-label">💡 Full-circle</div>This is the principle behind both <strong>Dependency Injection</strong> (Module 5) and <strong>Clean Architecture's</strong> Dependency Rule (Module 13). DIP is the "why"; DI is the "how".</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-purple" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Explain the Single Responsibility Principle with an example.</div><div class="interview-a"><span class="a-label">A</span>A class should have one reason to change. If an InvoiceService calculates totals, renders a PDF, and sends email, three unrelated concerns can break it. Splitting into calculator, renderer, and sender means each changes for one reason and is independently testable.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>What does Open/Closed mean in practice?</div><div class="interview-a"><span class="a-label">A</span>You should add new behaviour by adding code, not by editing existing tested code. Instead of a growing if/switch on a type, define an interface and add a new implementing class for each case — typically via polymorphism or the Strategy pattern. Existing code stays untouched.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Give a Liskov violation.</div><div class="interview-a"><span class="a-label">A</span>Square inheriting Rectangle: setting width also changes height, breaking callers that assume independent sides. Or an Ostrich subclass of Bird whose Fly() throws. The fix is to not force an is-a relationship the subtype can't honour — model capabilities with separate abstractions. A subclass overriding a method to throw NotSupportedException is the tell.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>Interface Segregation — why?</div><div class="interview-a"><span class="a-label">A</span>So clients don't depend on methods they don't use. A fat IMachine with Print/Scan/Fax forces a simple printer to implement Scan and Fax it can't do. Splitting into IPrinter, IScanner lets each class implement only what applies, keeping interfaces cohesive.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>How does Dependency Inversion relate to DI?</div><div class="interview-a"><span class="a-label">A</span>DIP says high-level and low-level modules should both depend on abstractions, not on each other. Dependency Injection is how you achieve it in practice — a class declares an interface in its constructor and the container supplies the concrete implementation. DIP is the principle; DI is the mechanism, and it's also the basis of Clean Architecture's dependency rule.</div></div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch8">
+    <div class="chapter-header"><div class="chapter-num">08</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>All five principles, named &amp; explained</span></li>
+          <li><span class="check">✓</span><span>A concrete before/after example for each</span></li>
+          <li><span class="check">✓</span><span>The smell each one prevents</span></li>
+          <li><span class="check">✓</span><span>DIP ↔ DI ↔ Clean Architecture connection</span></li>
+          <li><span class="check">✓</span><span>Applying SOLID to an LLD design question</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Academic formal definitions (LSP covariance rules)</span></li>
+          <li><span class="check">○</span><span>Over-applying SOLID to tiny code (dogma)</span></li>
+          <li><span class="check">○</span><span>Every related acronym (DRY/KISS/YAGNI — know briefly)</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>S</strong> — Single Responsibility: one class, one reason to change. Split mixed concerns.</div>
+      <div class="rev-item"><strong>O</strong> — Open/Closed: extend via new classes, don't edit working code. Interface + polymorphism / Strategy.</div>
+      <div class="rev-item"><strong>L</strong> — Liskov: subtypes must be substitutable for the base. Square/Rectangle &amp; throwing overrides are violations.</div>
+      <div class="rev-item"><strong>I</strong> — Interface Segregation: many small focused interfaces &gt; one fat interface clients don't fully use.</div>
+      <div class="rev-item"><strong>D</strong> — Dependency Inversion: depend on abstractions, not concretions. The "why" behind DI &amp; Clean Architecture.</div>
+      <div class="rev-item"><strong>Purpose:</strong> maintainable, extensible, testable code. Guidelines, not dogma — don't over-apply to trivial code.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

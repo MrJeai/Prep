@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 6 · M20 — Messaging with RabbitMQ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 6 · Module 20</div>
+    <h1>Messaging with RabbitMQ</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — Why Messaging</a>
+  <a class="nav-item" href="#ch2">02 — Core Concepts</a>
+  <a class="nav-item" href="#ch3">03 — Exchange Types &amp; Patterns</a>
+  <a class="nav-item" href="#ch4">04 — Reliability &amp; DLQ</a>
+  <a class="nav-item" href="#ch5">05 — RabbitMQ vs Kafka</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 6 — Module 20 · Async Communication</div>
+    <h1>Messaging with RabbitMQ</h1>
+    <p>Message queues are how services talk without waiting on each other — the backbone of the decoupled, resilient systems from Module 19. This module covers the mental model (producers, exchanges, queues), the routing patterns, and the reliability machinery — acks, retries, and dead-letter queues — that separates a toy demo from production messaging.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Medium-High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> Message Broker</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 6 · Phase 2</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Why Messaging</h2><div class="ch-sub">Decoupling, buffering, and resilience</div></div></div>
+    <div class="section">
+      <p>Instead of Service A calling Service B directly and waiting, A drops a <strong>message</strong> onto a broker and moves on; B consumes it when ready. This unlocks three big wins:</p>
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">🔗</div><div class="card-title">Decoupling</div><div class="card-body">Producer doesn't know or wait for the consumer. Either can be deployed, scaled, or restarted independently.</div></div>
+        <div class="info-card"><div class="card-icon">🪣</div><div class="card-title">Buffering / load levelling</div><div class="card-body">Spikes pile up in the queue and are processed at a steady rate, protecting downstream systems.</div></div>
+        <div class="info-card"><div class="card-icon">🛡️</div><div class="card-title">Resilience</div><div class="card-body">If the consumer is down, messages wait safely in the queue instead of being lost.</div></div>
+      </div>
+      <div class="callout tip"><div class="callout-label">💡 Classic example</div>On checkout, the Order service publishes an <code class="inline">OrderPlaced</code> event and returns immediately. Email, inventory, and analytics services each consume it on their own time. The user isn't blocked waiting for emails to send.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>Core Concepts</h2><div class="ch-sub">The RabbitMQ mental model</div></div></div>
+    <div class="section">
+      <p>A crucial RabbitMQ detail: <strong>producers publish to an exchange, not directly to a queue.</strong> The exchange decides which queue(s) get the message based on rules.</p>
+      <div class="pipeline-visual">
+        <div class="pipeline-stage"><div class="ps-num">1</div><div class="ps-name">Producer</div><div class="ps-desc">Publishes a message</div></div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-stage"><div class="ps-num">2</div><div class="ps-name">Exchange</div><div class="ps-desc">Routes by rules + routing key</div></div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-stage"><div class="ps-num">3</div><div class="ps-name">Queue</div><div class="ps-desc">Buffers messages (via a binding)</div></div>
+        <div class="pipeline-connector">→</div>
+        <div class="pipeline-stage"><div class="ps-num">4</div><div class="ps-name">Consumer</div><div class="ps-desc">Processes &amp; acks</div></div>
+      </div>
+      <table class="comp-table">
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td><strong>Producer</strong></td><td>App that sends messages.</td></tr>
+        <tr><td><strong>Exchange</strong></td><td>Receives messages and routes them to queues.</td></tr>
+        <tr><td><strong>Queue</strong></td><td>Buffer that holds messages until consumed.</td></tr>
+        <tr><td><strong>Binding</strong></td><td>Rule linking an exchange to a queue.</td></tr>
+        <tr><td><strong>Routing key</strong></td><td>Label on a message the exchange uses to route it.</td></tr>
+        <tr><td><strong>Consumer</strong></td><td>App that reads &amp; processes messages.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>Exchange Types &amp; Patterns</h2><div class="ch-sub">How routing decisions are made</div></div></div>
+    <div class="section">
+      <table class="comp-table">
+        <tr><th>Exchange type</th><th>Routing behaviour</th><th>Use case</th></tr>
+        <tr><td><strong>Direct</strong></td><td>Routing key matches exactly</td><td>Send to a specific queue</td></tr>
+        <tr><td><strong>Fanout</strong></td><td>Copy to <em>all</em> bound queues</td><td>Pub/sub broadcast</td></tr>
+        <tr><td><strong>Topic</strong></td><td>Pattern match on routing key (<code class="inline">order.*</code>)</td><td>Flexible category routing</td></tr>
+        <tr><td><strong>Headers</strong></td><td>Match on header values</td><td>Rare, attribute-based</td></tr>
+      </table>
+      <div class="section-title" style="margin-top:16px;"><div class="bar" style="background:var(--coral-400);"></div>Two foundational patterns</div>
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Work Queue (competing consumers)</div><div class="method-card-body">One queue, many consumers — each message goes to <strong>one</strong> consumer. Scales processing horizontally; add consumers to go faster.</div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">Publish/Subscribe (fanout)</div><div class="method-card-body">One message copied to <strong>every</strong> subscriber's queue. Each service reacts to the same event independently (the OrderPlaced example).</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Reliability &amp; Dead-Letter Queues</h2><div class="ch-sub">Making sure messages aren't lost — or stuck forever</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.1 — Acknowledgements</div>
+      <p>A consumer sends an <strong>ack</strong> only after it successfully processes a message; until then RabbitMQ keeps it. If the consumer crashes before acking, the message is requeued and redelivered — so nothing is lost. This is "at-least-once" delivery.</p>
+      <div class="section-title" style="margin-top:16px;"><div class="bar" style="background:var(--amber-200);"></div>4.2 — Retries &amp; dead-letter queues</div>
+      <p>If processing keeps failing (bad data, a bug), endlessly redelivering creates a "poison message" loop. The fix: retry a few times, then route the message to a <strong>dead-letter queue (DLQ)</strong> — a side queue for failed messages you can inspect and handle separately, so one bad message doesn't block the rest.</p>
+      <div class="callout danger"><div class="callout-label">🚫 At-least-once ⇒ design for duplicates</div>Because a message can be delivered more than once (consumer processed it but crashed before acking), <strong>consumers must be idempotent</strong> — handling the same message twice must have no extra effect. Track processed message ids, or design naturally idempotent operations. This is the same idempotency principle from Modules 1 and 19.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>RabbitMQ vs Kafka (and Azure Service Bus)</h2><div class="ch-sub">Knowing when each fits</div></div></div>
+    <div class="section">
+      <table class="comp-table">
+        <tr><th></th><th>RabbitMQ</th><th>Kafka</th></tr>
+        <tr><td>Model</td><td>Message broker (smart routing)</td><td>Distributed log / event stream</td></tr>
+        <tr><td>Strength</td><td>Flexible routing, task queues, per-message ack</td><td>Huge throughput, replayable event history</td></tr>
+        <tr><td>Message after read</td><td>Removed once acked</td><td>Retained for a period; consumers track offset</td></tr>
+        <tr><td>Best for</td><td>Background jobs, RPC, complex routing</td><td>Event streaming, analytics, high-volume pipelines</td></tr>
+      </table>
+      <div class="callout note"><div class="callout-label">📝 Azure Service Bus</div>The managed equivalent on Azure — a broker similar in spirit to RabbitMQ (queues + topics/subscriptions) without running your own infrastructure. Mention it as the cloud-native option (ties to Module 23).</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Why use a message queue?</div><div class="interview-a"><span class="a-label">A</span>To decouple services so the producer doesn't wait on the consumer, to buffer spikes so downstream systems process at a steady rate, and for resilience — if a consumer is down, messages wait safely instead of being lost. For example, an Order service publishes OrderPlaced and returns instantly while email and inventory services consume it on their own time.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>Walk me through how a message flows in RabbitMQ.</div><div class="interview-a"><span class="a-label">A</span>A producer publishes to an exchange, not directly to a queue. The exchange routes the message to one or more queues based on its type and the message's routing key via bindings. Consumers read from the queue and acknowledge once processed. Producers publishing to exchanges rather than queues is the key distinction.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Work queue vs pub/sub?</div><div class="interview-a"><span class="a-label">A</span>In a work queue (competing consumers) one queue has many consumers and each message goes to exactly one of them — used to scale processing. In pub/sub (fanout) the message is copied to every subscriber's queue so multiple services each react to the same event independently.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>What's a dead-letter queue and why have one?</div><div class="interview-a"><span class="a-label">A</span>A side queue where messages go after they fail processing a set number of times. Without it, a poison message keeps getting redelivered and can block the queue. The DLQ isolates failures so you can inspect and handle them separately while the rest of the queue keeps flowing.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>Why must consumers be idempotent?</div><div class="interview-a"><span class="a-label">A</span>Because delivery is at-least-once — a consumer might process a message but crash before acking, so it's redelivered. Handling the same message twice must have no extra effect. I track processed message ids or design the operation to be naturally idempotent.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>RabbitMQ vs Kafka?</div><div class="interview-a"><span class="a-label">A</span>RabbitMQ is a message broker with flexible routing and per-message acks, great for task queues and background jobs; messages are removed once acked. Kafka is a distributed log built for very high throughput and replayable event streams, where messages are retained and consumers track an offset. I'd pick RabbitMQ for job processing and routing, Kafka for event streaming and analytics.</div></div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Why messaging: decouple, buffer, resilience</span></li>
+          <li><span class="check">✓</span><span>Producer → exchange → queue → consumer flow</span></li>
+          <li><span class="check">✓</span><span>Exchange types; work queue vs pub/sub</span></li>
+          <li><span class="check">✓</span><span>Acks, retries, dead-letter queues</span></li>
+          <li><span class="check">✓</span><span>Idempotent consumers / at-least-once delivery</span></li>
+          <li><span class="check">✓</span><span>RabbitMQ vs Kafka at a high level</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Quorum queues &amp; clustering internals</span></li>
+          <li><span class="check">○</span><span>AMQP protocol frame details</span></li>
+          <li><span class="check">○</span><span>MassTransit/NServiceBus framework specifics</span></li>
+          <li><span class="check">○</span><span>Kafka partitioning/consumer-group tuning depth</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Why:</strong> decouple (no waiting), buffer spikes (load levelling), resilience (messages wait if consumer down).</div>
+      <div class="rev-item"><strong>Flow:</strong> producer → <strong>exchange</strong> → (binding + routing key) → queue → consumer → ack. Publish to exchange, not queue.</div>
+      <div class="rev-item"><strong>Exchanges:</strong> direct (exact key), fanout (all queues), topic (pattern), headers.</div>
+      <div class="rev-item"><strong>Patterns:</strong> work queue = one msg → one consumer (scale); pub/sub fanout = one msg → all subscribers.</div>
+      <div class="rev-item"><strong>Reliability:</strong> ack after success → redelivered if crash (at-least-once). Retry then <strong>DLQ</strong> for poison messages.</div>
+      <div class="rev-item"><strong>Idempotent consumers</strong> required (dedupe by message id) because of at-least-once delivery.</div>
+      <div class="rev-item"><strong>RabbitMQ</strong> = broker, flexible routing, msg removed on ack. <strong>Kafka</strong> = log, high throughput, retained/replayable. Azure = Service Bus.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

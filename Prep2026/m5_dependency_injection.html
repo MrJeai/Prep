@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 · M5 — Dependency Injection & Lifetimes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · Module 5</div>
+    <h1>Dependency Injection</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — The Problem DI Solves</a>
+  <a class="nav-item" href="#ch2">02 — How DI Works in Core</a>
+  <a class="nav-item" href="#ch3">03 — Service Lifetimes</a>
+  <a class="nav-item" href="#ch4">04 — Lifetime Pitfalls</a>
+  <a class="nav-item" href="#ch5">05 — Advanced Patterns</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 5 · Core Building Block</div>
+    <h1>Dependency Injection &amp; Service Lifetimes</h1>
+    <p>DI is woven into the fabric of ASP.NET Core — and it's the topic interviewers return to again and again, especially the lifetime questions. This module starts from <em>why</em> DI exists (the pain of <code class="inline">new</code>), shows exactly how the built-in container resolves your objects, and goes deep on Transient/Scoped/Singleton including the captive-dependency trap that catches most candidates.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> Design Pattern + Framework</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- CH1 -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>The Problem DI Solves</h2><div class="ch-sub">Why creating your own dependencies hurts</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.1 — The tightly-coupled way</div>
+      <p>Consider a controller that needs a service. The obvious approach is to create it directly:</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">tightly coupled — bad</span></div><pre><span class="kw">public class</span> <span class="type">UserController</span>
+{
+    <span class="cmt">// Controller creates its own dependency with 'new'</span>
+    <span class="kw">private readonly</span> <span class="type">UserService</span> _service = <span class="kw">new</span> <span class="type">UserService</span>();
+}</pre></div>
+      <p>This looks harmless but creates three real problems:</p>
+      <ul class="checklist mistake" style="margin-top:6px;">
+        <li><span class="check" style="color:var(--red-400);">✗</span><span><strong>Tight coupling:</strong> the controller is welded to the concrete <code class="inline">UserService</code>. To swap in a different implementation you must edit and recompile the controller.</span></li>
+        <li><span class="check" style="color:var(--red-400);">✗</span><span><strong>Untestable:</strong> you can't substitute a fake/mock <code class="inline">UserService</code> in a unit test, because the controller hard-codes the real one (which may hit a database).</span></li>
+        <li><span class="check" style="color:var(--red-400);">✗</span><span><strong>Hidden dependency chains:</strong> if <code class="inline">UserService</code> needs a repository, which needs a DbContext, the controller ends up responsible for constructing the whole graph.</span></li>
+      </ul>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.2 — Inversion of Control &amp; the DI solution</div>
+      <p>The fix is to stop creating dependencies and instead <strong>ask for them</strong>. The class declares what it needs (as an interface) in its constructor, and something external supplies it:</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">dependency injected — good</span></div><pre><span class="kw">public class</span> <span class="type">UserController</span>
+{
+    <span class="kw">private readonly</span> <span class="type">IUserService</span> _service;
+
+    <span class="cmt">// The framework injects an IUserService — controller just asks</span>
+    <span class="kw">public</span> <span class="meth">UserController</span>(<span class="type">IUserService</span> service)
+    {
+        _service = service;
+    }
+}</pre></div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — IoC vs DI</div>
+        <strong>Inversion of Control (IoC)</strong> is the broad principle: a class no longer controls the creation of its dependencies — that control is "inverted" to an external party. <strong>Dependency Injection</strong> is the specific technique that implements IoC by <em>supplying</em> dependencies through the constructor (or, less commonly, a method/property). The thing doing the supplying is the <strong>DI container</strong>. In short: <em>DI is one way to achieve IoC.</em>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 The benefits, in interview language</div>
+        Loose coupling (depend on interfaces, not implementations), easy testing (inject mocks), easier maintenance (swap implementations in one place — the registration), and clear, explicit dependencies (the constructor documents exactly what a class needs).
+      </div>
+    </div>
+  </div>
+
+  <!-- CH2 -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>How DI Works in ASP.NET Core</h2><div class="ch-sub">Register, resolve, and the object graph</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.1 — Step 1: Register services</div>
+      <p>In <code class="inline">Program.cs</code> you tell the container "when someone asks for this interface, give them this implementation, and keep it for this long":</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs</span></div><pre>builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">IUserService</span>, <span class="type">UserService</span>&gt;();
+builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">IUserRepository</span>, <span class="type">UserRepository</span>&gt;();
+builder.Services.<span class="meth">AddSingleton</span>&lt;<span class="type">ICacheService</span>, <span class="type">RedisCacheService</span>&gt;();</pre></div>
+      <div class="callout note">
+        <div class="callout-label">📝 Built-in, unlike Framework</div>
+        In .NET Framework there was no DI container in the box — teams pulled in Autofac, Ninject, or Unity. ASP.NET Core ships a capable container as a first-class part of the framework. (You can still plug in Autofac for advanced features, but most apps never need to.)
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.2 — Step 2: The container resolves the graph</div>
+      <p>When a request arrives and the framework needs a <code class="inline">UserController</code>, the container looks at its constructor, sees it needs an <code class="inline">IUserService</code>, looks at <em>that</em> constructor, sees it needs an <code class="inline">IUserRepository</code>, and so on — <strong>recursively building the entire object graph</strong> for you.</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);"><div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div><div class="flow-text"><div>Framework needs a <strong>UserController</strong></div><div class="flow-note" style="color:var(--purple-600);">Reads its constructor → needs IUserService</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">2</div><div class="flow-text"><div>Container creates <strong>UserService</strong></div><div class="flow-note" style="color:var(--teal-600);">Reads its constructor → needs IUserRepository</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);"><div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">3</div><div class="flow-text"><div>Container creates <strong>UserRepository</strong></div><div class="flow-note" style="color:var(--amber-600);">Needs AppDbContext → creates it too</div></div></div>
+        <div class="flow-arrow-down">↑</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">4</div><div class="flow-text"><div>Graph assembled bottom-up &amp; injected</div><div class="flow-note" style="color:var(--green-600);">Fully-built controller handed to the framework.</div></div></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Use constructor injection, avoid the service locator</div>
+        Always declare dependencies in the constructor. Resist the temptation to do <code class="inline">HttpContext.RequestServices.GetService&lt;T&gt;()</code> inside a method — that's the <strong>service locator anti-pattern</strong>: it hides dependencies, defeats testability, and is a known interview red flag.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH3 -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>Service Lifetimes</h2><div class="ch-sub">Transient, Scoped, Singleton — the most-asked DI question</div></div></div>
+    <div class="section">
+      <p>When you register a service, you choose <em>how long each instance lives</em>. There are exactly three lifetimes, and choosing correctly is both a correctness and a performance concern.</p>
+      <div class="method-cards">
+        <div class="method-card" style="border-color:var(--blue-200);"><div class="method-card-head" style="background:var(--blue-50);color:var(--blue-800);">Transient</div><div class="method-card-body"><strong>New instance every time</strong> it's requested — even twice within the same request.<ul><li>Use for: lightweight, stateless services.</li><li>Method: <code class="inline">AddTransient</code></li></ul></div></div>
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Scoped</div><div class="method-card-body"><strong>One instance per HTTP request</strong>, shared throughout that request, then disposed.<ul><li>Use for: DbContext, business/repository services. <em>The default choice.</em></li><li>Method: <code class="inline">AddScoped</code></li></ul></div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">Singleton</div><div class="method-card-body"><strong>One instance for the entire app</strong> lifetime, shared across all requests &amp; users.<ul><li>Use for: caches, config, stateless thread-safe helpers.</li><li>Method: <code class="inline">AddSingleton</code></li></ul></div></div>
+      </div>
+      <table class="comp-table">
+        <tr><th>Lifetime</th><th>Created</th><th>Shared across requests?</th><th>Typical use</th></tr>
+        <tr><td><strong>Transient</strong></td><td>Every single resolution</td><td>No</td><td>Cheap, stateless helpers, mappers</td></tr>
+        <tr><td><strong>Scoped</strong></td><td>Once per HTTP request</td><td>No (per-request)</td><td><strong>DbContext</strong>, services, repositories</td></tr>
+        <tr><td><strong>Singleton</strong></td><td>Once for the app</td><td>Yes (all requests)</td><td>Caching, configuration, in-memory state</td></tr>
+      </table>
+      <div class="callout note">
+        <div class="callout-label">📝 Why DbContext is Scoped</div>
+        EF Core's <code class="inline">DbContext</code> tracks changes for a single unit of work and is <strong>not thread-safe</strong>. Scoped gives each request its own context (so concurrent requests don't corrupt each other) while sharing one context across everything <em>within</em> that request (so all your repositories enrol in the same transaction). Singleton would be shared across all requests — a bug. Transient would give each repository a different context — also a bug. Scoped is exactly right.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH4 -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Lifetime Pitfalls</h2><div class="ch-sub">The captive dependency — the classic interview trap</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.1 — The captive dependency</div>
+      <p>The cardinal rule: <strong>a longer-lived service must never capture a shorter-lived one.</strong> The dangerous case is injecting a <strong>Scoped</strong> (or Transient) service into a <strong>Singleton</strong>.</p>
+      <div class="callout danger">
+        <div class="callout-label">🚫 Why it's a bug</div>
+        A Singleton is created <em>once</em> and lives forever. If it holds a reference to a Scoped service (like a DbContext), that "per-request" object is now trapped inside the Singleton for the whole app lifetime — it's never disposed, it leaks resources (e.g. a DB connection), and it's shared across every request even though it was meant to last one. This is called a <strong>captive dependency</strong>.
+      </div>
+      <table class="comp-table">
+        <tr><th>Singleton injects…</th><th>Scoped injects…</th><th>Transient injects…</th></tr>
+        <tr><td>Singleton ✅</td><td>Singleton ✅</td><td>Singleton ✅</td></tr>
+        <tr><td>Scoped ❌ (captive!)</td><td>Scoped ✅</td><td>Scoped ✅</td></tr>
+        <tr><td>Transient ⚠️ (captured)</td><td>Transient ✅</td><td>Transient ✅</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="callout-label">💡 How the framework helps</div>
+        In Development, ASP.NET Core runs <strong>scope validation</strong> at startup and throws if a Singleton tries to consume a Scoped service — catching the mistake before it ships. If you genuinely need a scoped service inside a singleton, inject an <code class="inline">IServiceScopeFactory</code> and create a scope explicitly when you need the work done.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.2 — Scoped services in middleware</div>
+      <p>A related trap (covered in your Middleware module): middleware is built <strong>once</strong>, so its constructor behaves like a singleton. Never inject a Scoped service into a middleware <em>constructor</em> — inject it as a parameter of <code class="inline">InvokeAsync(HttpContext, IMyScopedService)</code> instead, which resolves it from the per-request scope.</p>
+    </div>
+  </div>
+
+  <!-- CH5 -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Advanced Patterns</h2><div class="ch-sub">Factory registration, multiple implementations, IOptions</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — Factory registration</div>
+      <p>When creating a service needs logic or other services, register it with a factory lambda:</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre>builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">IPaymentGateway</span>&gt;(sp =&gt;
+{
+    <span class="kw">var</span> config = sp.<span class="meth">GetRequiredService</span>&lt;<span class="type">IConfiguration</span>&gt;();
+    <span class="kw">return new</span> <span class="type">StripeGateway</span>(config[<span class="str">"Stripe:Key"</span>]);
+});</pre></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — Multiple implementations of one interface</div>
+      <p>Register several, then inject them all as <code class="inline">IEnumerable&lt;T&gt;</code> — useful for things like a set of validators or notification channels (email, SMS, push):</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre>builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">INotifier</span>, <span class="type">EmailNotifier</span>&gt;();
+builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">INotifier</span>, <span class="type">SmsNotifier</span>&gt;();
+<span class="cmt">// Inject IEnumerable&lt;INotifier&gt; to get both</span></pre></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.3 — IOptions for typed configuration</div>
+      <p>Configuration sections bind to strongly-typed classes and are injected via <code class="inline">IOptions&lt;T&gt;</code> — registered through DI. (Full detail in Module 6.) The key point: typed config is delivered <em>through</em> the DI system, which is why it ties in here.</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre>builder.Services.<span class="meth">Configure</span>&lt;<span class="type">JwtSettings</span>&gt;(
+    builder.Configuration.<span class="meth">GetSection</span>(<span class="str">"Jwt"</span>));
+<span class="cmt">// Then inject IOptions&lt;JwtSettings&gt; anywhere</span></pre></div>
+    </div>
+  </div>
+
+  <!-- CH6 -->
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>What is Dependency Injection and what problem does it solve?</div><div class="interview-a"><span class="a-label">A</span>DI is a technique where a class receives its dependencies from an external source instead of creating them itself. It solves tight coupling: by depending on interfaces and having the container supply implementations, classes become easy to test (inject mocks), easy to maintain (swap implementations in one place), and have explicit, visible dependencies. It's the concrete way ASP.NET Core implements Inversion of Control.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>Explain Transient, Scoped, and Singleton with examples.</div><div class="interview-a"><span class="a-label">A</span>Transient creates a new instance on every resolution — good for lightweight stateless helpers. Scoped creates one instance per HTTP request, shared within that request — the default for business services and DbContext. Singleton creates one instance for the whole application, shared across all requests — good for caches and configuration. The key is matching lifetime to the service's state and thread-safety needs.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Why is EF Core's DbContext registered as Scoped?</div><div class="interview-a"><span class="a-label">A</span>Because DbContext is a unit of work and isn't thread-safe. Scoped gives each request its own context so concurrent requests don't interfere, while sharing a single context across all components within that request so they participate in the same change tracker and transaction. Singleton would share it across all requests (unsafe); Transient would give each repository a different context (breaks the unit of work).</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>What is a captive dependency?</div><div class="interview-a"><span class="a-label">A</span>It's when a longer-lived service captures a shorter-lived one — classically injecting a Scoped service into a Singleton. The scoped object then lives as long as the singleton (the whole app), so it's never disposed, leaks resources, and is wrongly shared across requests. ASP.NET Core's scope validation catches this at startup in Development. The fix is to inject an IServiceScopeFactory and create a scope when needed.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>What's the difference between IoC and DI?</div><div class="interview-a"><span class="a-label">A</span>IoC is the general principle — control over creating dependencies is inverted away from the class to an external party. DI is a specific implementation of IoC where dependencies are supplied, typically through the constructor, by a container. So every DI is IoC, but IoC also includes other techniques.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>What's wrong with the service locator pattern?</div><div class="interview-a"><span class="a-label">A</span>Calling the container directly inside a method (e.g. RequestServices.GetService&lt;T&gt;()) hides a class's real dependencies — they're no longer visible in the constructor — which makes the code harder to understand and to unit test, since you can't simply pass in mocks. Prefer constructor injection so dependencies are explicit.</div></div>
+  </div>
+
+  <!-- CH7 -->
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Why DI exists and how it removes coupling</span></li>
+          <li><span class="check">✓</span><span>IoC vs DI distinction</span></li>
+          <li><span class="check">✓</span><span>All three lifetimes + when to use each, with examples</span></li>
+          <li><span class="check">✓</span><span>Why DbContext is Scoped</span></li>
+          <li><span class="check">✓</span><span>The captive dependency trap and how to avoid it</span></li>
+          <li><span class="check">✓</span><span>Constructor injection vs service-locator anti-pattern</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Replacing the built-in container with Autofac (know it's possible)</span></li>
+          <li><span class="check">○</span><span>Keyed services / advanced registration nuances</span></li>
+          <li><span class="check">○</span><span>Property/method injection (constructor injection covers ~99%)</span></li>
+          <li><span class="check">○</span><span>Writing your own container internals</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>DI:</strong> class receives dependencies instead of <code>new</code>-ing them. Implements IoC. → loose coupling, testability, maintainability.</div>
+      <div class="rev-item"><strong>IoC vs DI:</strong> IoC = the principle (control inverted); DI = the technique (inject via constructor). Every DI is IoC.</div>
+      <div class="rev-item"><strong>Register:</strong> <code>builder.Services.AddScoped&lt;IFoo, Foo&gt;()</code>. Resolve: constructor injection. Container builds the whole graph recursively.</div>
+      <div class="rev-item"><strong>Transient:</strong> new every time. Lightweight stateless services.</div>
+      <div class="rev-item"><strong>Scoped:</strong> one per request. DbContext, business services. The default.</div>
+      <div class="rev-item"><strong>Singleton:</strong> one per app. Cache, config, stateless thread-safe helpers.</div>
+      <div class="rev-item"><strong>Captive dependency:</strong> Singleton holding a Scoped/Transient → trapped forever, leaks, shared wrongly. Never inject Scoped into Singleton.</div>
+      <div class="rev-item"><strong>Avoid:</strong> service locator (<code>GetService</code> in a method) — hides deps, hurts testing. Use constructor injection.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 2 · M11 — SQL Server for Interviews</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 2 · Module 11</div>
+    <h1>SQL Server for Interviews</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — Why SQL Still Matters</a>
+  <a class="nav-item" href="#ch2">02 — Joins</a>
+  <a class="nav-item" href="#ch3">03 — Indexes &amp; Execution Plans</a>
+  <a class="nav-item" href="#ch4">04 — Normalization</a>
+  <a class="nav-item" href="#ch5">05 — Transactions &amp; Isolation</a>
+  <a class="nav-item" href="#ch6">06 — Query Patterns Asked</a>
+  <a class="nav-item" href="#ch7">07 — Interview Prep</a>
+  <a class="nav-item" href="#ch8">08 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 2 — Module 11 · The Database Itself</div>
+    <h1>SQL Server for Interviews</h1>
+    <p>EF Core writes SQL for you — which is exactly why interviewers check that you can read and write it yourself. This module covers the database-side knowledge that separates candidates: the join types, how indexes actually speed up (or silently slow down) queries, normalization, isolation levels and deadlocks, and the handful of query puzzles that come up again and again.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> SQL Server / T-SQL</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 2 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- CH1 -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Why SQL Still Matters</h2><div class="ch-sub">The ORM hides it; the interview tests it</div></div></div>
+    <div class="section">
+      <p>You already work with SQL Server, so the relational basics aren't new. What interviews probe is the next layer: <em>why</em> a query is slow, <em>how</em> an index changes things, and <em>what</em> isolation level your code runs under. EF Core generates SQL, but it can't make good schema or indexing decisions for you — that judgement is yours, and it's what gets tested.</p>
+      <div class="callout note">
+        <div class="callout-label">📝 The logical order SQL runs in</div>
+        SQL isn't executed top-to-bottom as written. The logical order is: <code class="inline">FROM</code> → <code class="inline">WHERE</code> → <code class="inline">GROUP BY</code> → <code class="inline">HAVING</code> → <code class="inline">SELECT</code> → <code class="inline">ORDER BY</code>. This explains two classic gotchas: you can't use a <code class="inline">SELECT</code> alias in a <code class="inline">WHERE</code> (the WHERE runs first), and you filter rows with <code class="inline">WHERE</code> but filter <em>groups</em> with <code class="inline">HAVING</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH2 -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>Joins</h2><div class="ch-sub">Combining rows across tables — the everyday skill</div></div></div>
+    <div class="section">
+      <table class="comp-table">
+        <tr><th>Join</th><th>Returns</th></tr>
+        <tr><td><strong>INNER JOIN</strong></td><td>Only rows with a match in <em>both</em> tables.</td></tr>
+        <tr><td><strong>LEFT JOIN</strong></td><td>All rows from the left table + matches from the right (NULLs where none).</td></tr>
+        <tr><td><strong>RIGHT JOIN</strong></td><td>All rows from the right + matches from the left.</td></tr>
+        <tr><td><strong>FULL OUTER JOIN</strong></td><td>All rows from both; NULLs where there's no match on either side.</td></tr>
+        <tr><td><strong>CROSS JOIN</strong></td><td>Cartesian product — every left row paired with every right row.</td></tr>
+        <tr><td><strong>SELF JOIN</strong></td><td>A table joined to itself (e.g. employee → manager in the same table).</td></tr>
+      </table>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">SQL</span><span class="file-name">left join example</span></div><pre><span class="kw">SELECT</span> c.Name, o.Total
+<span class="kw">FROM</span> Customers c
+<span class="kw">LEFT JOIN</span> Orders o <span class="kw">ON</span> o.CustomerId = c.Id;
+<span class="cmt">-- every customer, even those with no orders (Total = NULL)</span></pre></div>
+      <div class="callout tip">
+        <div class="callout-label">💡 The interview favourite: "find customers with no orders"</div>
+        A <code class="inline">LEFT JOIN ... WHERE o.Id IS NULL</code> returns exactly the left rows that had no match — a very common question. Know that this "anti-join" pattern is what LEFT JOIN + IS NULL achieves.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH3 -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>Indexes &amp; Execution Plans</h2><div class="ch-sub">How databases find rows fast — and the cost</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.1 — The book-index analogy</div>
+      <p>An <strong>index</strong> is a separate, sorted structure (a B-tree) that lets the database jump straight to rows instead of scanning the whole table — exactly like the index at the back of a book versus reading every page.</p>
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--blue-200);"><div class="method-card-head" style="background:var(--blue-50);color:var(--blue-800);">Clustered index</div><div class="method-card-body">Defines the <strong>physical order</strong> of the table's rows. <strong>One per table</strong> (usually the primary key). The data <em>is</em> the index's leaf level.</div></div>
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Non-clustered index</div><div class="method-card-body">A separate structure with a copy of the key columns + a pointer back to the row. <strong>Many per table.</strong> Great for columns you filter/join on often.</div></div>
+      </div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Seek vs Scan (what you look for in a plan)</div>
+        An <strong>index seek</strong> navigates directly to the rows it needs — fast, what you want. An <strong>index/table scan</strong> reads everything — fine for small tables or when most rows match, but a red flag on a large table filtered to a few rows. Reading the <strong>execution plan</strong> (the database's chosen strategy) to spot scans where seeks were possible is a senior skill.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.2 — Indexes aren't free</div>
+      <div class="mistakes-grid">
+        <div class="mistake-item"><div class="mistake-icon">✅</div><div class="mistake-body"><div class="mistake-title">Indexes speed up reads</div><div class="mistake-desc">Filtering, joining, and sorting on indexed columns get dramatically faster.</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">⚠️</div><div class="mistake-body"><div class="mistake-title">…but slow down writes &amp; cost space</div><div class="mistake-desc">Every INSERT/UPDATE/DELETE must also maintain every index, and each index takes storage.</div><div class="mistake-fix">→ Index the columns you actually filter/join on; don't index everything.</div></div></div>
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 Covering index</div>
+        A <strong>covering index</strong> includes (via <code class="inline">INCLUDE</code>) all the columns a query needs, so the query is answered entirely from the index without touching the table — eliminating expensive "key lookups." Mentioning this signals real indexing knowledge.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH4 -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Normalization</h2><div class="ch-sub">Organising tables to avoid redundancy and anomalies</div></div></div>
+    <div class="section">
+      <p><strong>Normalization</strong> is the process of structuring tables so each piece of data lives in exactly one place, eliminating redundancy and the update/insert/delete anomalies it causes. Three normal forms cover almost everything you'll be asked.</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);"><div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">1NF</div><div class="flow-text"><div><strong>First Normal Form</strong></div><div class="flow-note" style="color:var(--blue-600);">Atomic values only — no repeating groups or comma-lists in a column; each row unique.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">2NF</div><div class="flow-text"><div><strong>Second Normal Form</strong></div><div class="flow-note" style="color:var(--teal-600);">1NF + every non-key column depends on the <em>whole</em> primary key (no partial dependency on part of a composite key).</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">3NF</div><div class="flow-text"><div><strong>Third Normal Form</strong></div><div class="flow-note" style="color:var(--green-600);">2NF + no transitive dependencies (non-key columns don't depend on other non-key columns).</div></div></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Denormalization is a deliberate trade-off</div>
+        Normalization optimises for correctness and write efficiency but can require many joins to read. <strong>Denormalization</strong> intentionally duplicates data to make reads faster (fewer joins) — common in reporting and high-read systems. The interview-savvy answer: "normalize by default for integrity; denormalize selectively when read performance demands it, accepting the redundancy cost."
+      </div>
+    </div>
+  </div>
+
+  <!-- CH5 -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Transactions, ACID &amp; Isolation</h2><div class="ch-sub">Correctness when many users hit the same data</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — ACID</div>
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">⚛️</div><div class="card-title">Atomicity</div><div class="card-body">All steps in a transaction succeed, or none do.</div></div>
+        <div class="info-card"><div class="card-icon">✅</div><div class="card-title">Consistency</div><div class="card-body">A transaction moves the DB from one valid state to another (constraints hold).</div></div>
+        <div class="info-card"><div class="card-icon">🔒</div><div class="card-title">Isolation</div><div class="card-body">Concurrent transactions don't corrupt each other's view of the data.</div></div>
+        <div class="info-card"><div class="card-icon">💾</div><div class="card-title">Durability</div><div class="card-body">Once committed, changes survive crashes.</div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — Isolation levels &amp; the anomalies they prevent</div>
+      <table class="comp-table">
+        <tr><th>Level</th><th>Dirty read</th><th>Non-repeatable read</th><th>Phantom</th></tr>
+        <tr><td>Read Uncommitted</td><td>Possible</td><td>Possible</td><td>Possible</td></tr>
+        <tr><td><strong>Read Committed</strong> (SQL Server default)</td><td>Prevented</td><td>Possible</td><td>Possible</td></tr>
+        <tr><td>Repeatable Read</td><td>Prevented</td><td>Prevented</td><td>Possible</td></tr>
+        <tr><td>Serializable</td><td>Prevented</td><td>Prevented</td><td>Prevented</td></tr>
+      </table>
+      <div class="callout definition">
+        <div class="callout-label">📖 The three read anomalies</div>
+        <strong>Dirty read:</strong> you read another transaction's <em>uncommitted</em> change (which may be rolled back). <strong>Non-repeatable read:</strong> you read a row twice in one transaction and get different values because someone updated it between. <strong>Phantom read:</strong> you run the same query twice and new rows appear because someone inserted matching rows. Higher isolation prevents more anomalies but reduces concurrency.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.3 — Deadlocks</div>
+      <p>A <strong>deadlock</strong> occurs when transaction A holds a lock B needs, while B holds a lock A needs — neither can proceed. SQL Server detects this and kills one as the "deadlock victim," rolling it back. You reduce deadlocks by accessing tables in a <strong>consistent order</strong>, keeping transactions short, and using appropriate indexes so locks are taken on fewer rows.</p>
+    </div>
+  </div>
+
+  <!-- CH6 -->
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Query Patterns Interviewers Ask</h2><div class="ch-sub">The recurring puzzles — know these cold</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--green-200);"></div>6.1 — GROUP BY + HAVING</div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">SQL</span><span class="file-name">customers with more than 5 orders</span></div><pre><span class="kw">SELECT</span> CustomerId, <span class="meth">COUNT</span>(*) <span class="kw">AS</span> Orders
+<span class="kw">FROM</span> Orders
+<span class="kw">GROUP BY</span> CustomerId
+<span class="kw">HAVING</span> <span class="meth">COUNT</span>(*) &gt; <span class="num">5</span>;   <span class="cmt">-- HAVING filters groups; WHERE filters rows</span></pre></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--green-200);"></div>6.2 — Find duplicates</div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">SQL</span></div><pre><span class="kw">SELECT</span> Email, <span class="meth">COUNT</span>(*) 
+<span class="kw">FROM</span> Users 
+<span class="kw">GROUP BY</span> Email 
+<span class="kw">HAVING</span> <span class="meth">COUNT</span>(*) &gt; <span class="num">1</span>;</pre></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--green-200);"></div>6.3 — Nth highest (window functions)</div>
+      <p>The "second-highest salary" question. The clean, modern answer uses a window function:</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">SQL</span><span class="file-name">2nd highest salary per department</span></div><pre><span class="kw">SELECT</span> * <span class="kw">FROM</span> (
+  <span class="kw">SELECT</span> Name, DeptId, Salary,
+         <span class="meth">DENSE_RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION BY</span> DeptId <span class="kw">ORDER BY</span> Salary <span class="kw">DESC</span>) <span class="kw">AS</span> rnk
+  <span class="kw">FROM</span> Employees
+) t
+<span class="kw">WHERE</span> rnk = <span class="num">2</span>;</pre></div>
+      <div class="callout note">
+        <div class="callout-label">📝 Window functions to know</div>
+        <code class="inline">ROW_NUMBER()</code> (unique sequential number), <code class="inline">RANK()</code> (gaps after ties), <code class="inline">DENSE_RANK()</code> (no gaps after ties), all with <code class="inline">OVER (PARTITION BY ... ORDER BY ...)</code>. They compute per-group rankings without collapsing rows like GROUP BY does — a frequent "wow" answer in interviews.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--green-200);"></div>6.4 — Stored procedures (awareness)</div>
+      <p>A <strong>stored procedure</strong> is precompiled SQL stored in the database, called by name. Pros: can encapsulate logic and may reduce round-trips; cons: business logic in the DB is harder to version and test than in C#. Most modern .NET apps keep logic in services and let EF Core generate queries, using procs mainly for heavy set-based operations. Know the trade-off.</p>
+    </div>
+  </div>
+
+  <!-- CH7 -->
+  <div class="chapter ch-purple" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Difference between clustered and non-clustered indexes?</div><div class="interview-a"><span class="a-label">A</span>A clustered index defines the physical order of the rows and there's only one per table — typically the primary key, with the data stored in its leaf level. A non-clustered index is a separate sorted structure holding the key columns plus a pointer back to the row; you can have many. Clustered is the table sorted; non-clustered is a lookup structure pointing into it.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>When does an index hurt rather than help?</div><div class="interview-a"><span class="a-label">A</span>Indexes speed reads but every write must maintain them and they consume storage. On write-heavy tables, or columns you rarely filter on, extra indexes cost more than they save. So you index the columns you actually filter, join, or sort on — not everything.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>WHERE vs HAVING?</div><div class="interview-a"><span class="a-label">A</span>WHERE filters individual rows before grouping; HAVING filters groups after GROUP BY, so HAVING is where you put conditions on aggregates like COUNT(*) &gt; 5. This follows SQL's logical order: FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>Explain the normal forms.</div><div class="interview-a"><span class="a-label">A</span>1NF: atomic values, no repeating groups. 2NF: 1NF plus every non-key column depends on the whole primary key (no partial dependency). 3NF: 2NF plus no transitive dependencies — non-key columns depend only on the key, not on other non-key columns. You normalize for integrity and denormalize selectively when reads demand fewer joins.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>What's the default isolation level and what does it prevent?</div><div class="interview-a"><span class="a-label">A</span>SQL Server's default is Read Committed, which prevents dirty reads but still allows non-repeatable reads and phantoms. Higher levels — Repeatable Read and Serializable — prevent more anomalies at the cost of concurrency, by holding more locks for longer.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>What is a deadlock and how do you reduce them?</div><div class="interview-a"><span class="a-label">A</span>A deadlock is two transactions each holding a lock the other needs, so neither can proceed; SQL Server detects it and rolls one back as the victim. You reduce them by accessing tables in a consistent order, keeping transactions short, and indexing well so fewer rows are locked.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q7</span>How would you find the second-highest salary?</div><div class="interview-a"><span class="a-label">A</span>Use a window function: DENSE_RANK() OVER (ORDER BY Salary DESC) in a subquery, then filter WHERE rnk = 2. DENSE_RANK handles ties without leaving gaps. You can partition by department to get the second highest per group. A correlated subquery with MAX also works but window functions are cleaner.</div></div>
+  </div>
+
+  <!-- CH8 -->
+  <div class="chapter ch-blue" id="ch8">
+    <div class="chapter-header"><div class="chapter-num">08</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>All join types + the LEFT JOIN/IS NULL anti-join</span></li>
+          <li><span class="check">✓</span><span>Clustered vs non-clustered; seek vs scan; index trade-offs</span></li>
+          <li><span class="check">✓</span><span>1NF/2NF/3NF and when to denormalize</span></li>
+          <li><span class="check">✓</span><span>ACID, isolation levels, the three read anomalies</span></li>
+          <li><span class="check">✓</span><span>Deadlocks and how to reduce them</span></li>
+          <li><span class="check">✓</span><span>GROUP BY/HAVING, duplicates, window functions (Nth highest)</span></li>
+          <li><span class="check">✓</span><span>WHERE vs HAVING + SQL's logical execution order</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Query hints, deep plan-cache/parameter-sniffing tuning</span></li>
+          <li><span class="check">○</span><span>CTEs beyond basic awareness, recursive CTEs</span></li>
+          <li><span class="check">○</span><span>Partitioning, columnstore, in-memory OLTP</span></li>
+          <li><span class="check">○</span><span>Advanced T-SQL procedural programming</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Logical order:</strong> FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY. WHERE filters rows, HAVING filters groups.</div>
+      <div class="rev-item"><strong>Joins:</strong> INNER (both match), LEFT (all left), RIGHT, FULL OUTER, CROSS (cartesian), SELF. "No orders" = LEFT JOIN + IS NULL.</div>
+      <div class="rev-item"><strong>Clustered:</strong> physical row order, one per table (PK). <strong>Non-clustered:</strong> separate structure + pointer, many allowed.</div>
+      <div class="rev-item"><strong>Seek</strong> (direct, good) vs <strong>scan</strong> (reads all, bad on big filtered tables). Read the execution plan.</div>
+      <div class="rev-item"><strong>Index trade-off:</strong> faster reads, slower writes, more space. <strong>Covering index</strong> (INCLUDE) answers query without touching table.</div>
+      <div class="rev-item"><strong>Normal forms:</strong> 1NF atomic · 2NF no partial dependency · 3NF no transitive dependency. Denormalize for read speed.</div>
+      <div class="rev-item"><strong>ACID:</strong> Atomicity, Consistency, Isolation, Durability.</div>
+      <div class="rev-item"><strong>Isolation:</strong> Read Uncommitted &lt; Read Committed (default) &lt; Repeatable Read &lt; Serializable. Stops dirty / non-repeatable / phantom reads.</div>
+      <div class="rev-item"><strong>Deadlock:</strong> mutual lock wait → SQL kills a victim. Avoid: consistent access order, short txns, good indexes.</div>
+      <div class="rev-item"><strong>Patterns:</strong> duplicates = GROUP BY + HAVING COUNT&gt;1; Nth highest = DENSE_RANK() OVER(...). ROW_NUMBER/RANK/DENSE_RANK.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

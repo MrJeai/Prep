@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 3 · M12 — Authentication & Authorization</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 3 · Module 12</div>
+    <h1>Authentication &amp; Authorization</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — AuthN vs AuthZ</a>
+  <a class="nav-item" href="#ch2">02 — JWT Deep Dive</a>
+  <a class="nav-item" href="#ch3">03 — The Auth Flow in Core</a>
+  <a class="nav-item" href="#ch4">04 — Roles, Policies &amp; Claims</a>
+  <a class="nav-item" href="#ch5">05 — Refresh Tokens &amp; OAuth/OIDC</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 3 — Module 12 · Security</div>
+    <h1>Authentication &amp; Authorization</h1>
+    <p>Security is a near-guaranteed interview topic, and the two words get muddled constantly. This module nails the distinction, then goes deep on JWTs (the standard for modern APIs), how the auth middleware fits the pipeline, role vs policy authorization, and the refresh-token + OAuth/OIDC picture — everything a 4 YOE engineer is expected to explain confidently.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> JWT · OAuth · OIDC</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 3 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Authentication vs Authorization</h2><div class="ch-sub">Two different questions, asked in order</div></div></div>
+    <div class="section">
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">🪪</div><div class="card-title">Authentication (AuthN)</div><div class="card-body"><strong>Who are you?</strong> Verifying identity — checking credentials or a token. The result: a known (or anonymous) user.</div></div>
+        <div class="info-card"><div class="card-icon">🚦</div><div class="card-title">Authorization (AuthZ)</div><div class="card-body"><strong>What are you allowed to do?</strong> Deciding whether the now-identified user may access this resource or action.</div></div>
+      </div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Always in this order</div>
+        Authentication happens <em>first</em> (establish identity), then authorization (check permission). This maps directly to status codes from Module 1: failing AuthN → <strong>401 Unauthorized</strong> ("we don't know you"); passing AuthN but failing AuthZ → <strong>403 Forbidden</strong> ("we know you, but no").
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>JWT Deep Dive</h2><div class="ch-sub">The stateless token that powers modern APIs</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.1 — What a JWT is</div>
+      <p>A <strong>JWT (JSON Web Token)</strong> is a compact, signed token that carries claims about a user. It has three Base64URL-encoded parts separated by dots: <code class="inline">header.payload.signature</code>.</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">JWT</span></div><pre><span class="cmt">// Header — algorithm & type</span>
+{ <span class="str">"alg"</span>: <span class="str">"HS256"</span>, <span class="str">"typ"</span>: <span class="str">"JWT"</span> }
+<span class="cmt">// Payload — claims (statements about the user)</span>
+{ <span class="str">"sub"</span>: <span class="str">"42"</span>, <span class="str">"name"</span>: <span class="str">"Asha"</span>, <span class="str">"role"</span>: <span class="str">"Admin"</span>, <span class="str">"exp"</span>: <span class="num">1718000000</span> }
+<span class="cmt">// Signature = HMACSHA256(base64(header) + "." + base64(payload), secret)</span></pre></div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Claim</div>
+        A <strong>claim</strong> is a key-value statement about the subject, e.g. <code class="inline">role: Admin</code> or <code class="inline">sub: 42</code>. Standard claims include <code class="inline">sub</code> (subject/user id), <code class="inline">exp</code> (expiry), <code class="inline">iss</code> (issuer), <code class="inline">aud</code> (audience). In ASP.NET Core these become the <code class="inline">User</code> (a <code class="inline">ClaimsPrincipal</code>) on <code class="inline">HttpContext</code>.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.2 — Why JWT is stateless &amp; how validation works</div>
+      <p>The server <strong>signs</strong> the token with a secret (HMAC) or private key (RSA). On each request the client sends it in the <code class="inline">Authorization: Bearer &lt;token&gt;</code> header. The server <strong>re-computes the signature</strong> and compares — if it matches and the token hasn't expired, the user is authenticated. <strong>No database lookup, no server session.</strong></p>
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Signed ≠ encrypted</div>
+        A JWT's payload is only Base64-encoded, <strong>not encrypted</strong> — anyone can read it. The signature guarantees it wasn't <em>tampered with</em>, not that it's secret. So never put sensitive data (passwords, secrets) in a JWT, and always send it over HTTPS.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Connects to REST statelessness (Module 1)</div>
+        This is <em>why</em> APIs send a token on every request instead of keeping a server session — it keeps the API stateless and horizontally scalable. Any server can validate any token with just the shared secret.
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>The Auth Flow in ASP.NET Core</h2><div class="ch-sub">Middleware order and the [Authorize] attribute</div></div></div>
+    <div class="section">
+      <p>Two middleware components do the work, and <strong>order matters</strong> — authentication must run before authorization (you can't check permissions for someone you haven't identified).</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs</span></div><pre>builder.Services.<span class="meth">AddAuthentication</span>(<span class="str">"Bearer"</span>)
+    .<span class="meth">AddJwtBearer</span>(opt =&gt; { <span class="cmt">/* validate issuer, audience, key, lifetime */</span> });
+builder.Services.<span class="meth">AddAuthorization</span>();
+<span class="cmt">// ... pipeline ...</span>
+app.<span class="meth">UseAuthentication</span>();   <span class="cmt">// 1) who are you?  → sets HttpContext.User</span>
+app.<span class="meth">UseAuthorization</span>();    <span class="cmt">// 2) are you allowed? → enforces [Authorize]</span></pre></div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre><span class="anno">[Authorize]</span>                       <span class="cmt">// any authenticated user</span>
+<span class="anno">[Authorize(Roles = <span class="str">"Admin"</span>)]</span>      <span class="cmt">// must have the Admin role</span>
+<span class="anno">[AllowAnonymous]</span>                 <span class="cmt">// opt a specific action back out</span>
+<span class="kw">public class</span> <span class="type">OrdersController</span> : <span class="type">ControllerBase</span> { }</pre></div>
+      <div class="callout note">
+        <div class="callout-label">📝 What UseAuthentication does</div>
+        It reads the Bearer token, validates the signature/issuer/audience/expiry, builds a <code class="inline">ClaimsPrincipal</code>, and assigns it to <code class="inline">HttpContext.User</code>. After that, <code class="inline">UseAuthorization</code> and <code class="inline">[Authorize]</code> can make decisions based on those claims.
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Roles, Policies &amp; Claims</h2><div class="ch-sub">Three ways to express "who can do what"</div></div></div>
+    <div class="section">
+      <table class="comp-table">
+        <tr><th>Approach</th><th>How</th><th>Best for</th></tr>
+        <tr><td><strong>Role-based</strong></td><td><code class="inline">[Authorize(Roles="Admin")]</code></td><td>Simple, coarse buckets of users</td></tr>
+        <tr><td><strong>Claims-based</strong></td><td>Require a specific claim value</td><td>Fine-grained attributes (department, plan tier)</td></tr>
+        <tr><td><strong>Policy-based</strong></td><td>Named policy with requirements</td><td>Reusable, complex rules — the modern default</td></tr>
+      </table>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">policy example</span></div><pre>builder.Services.<span class="meth">AddAuthorization</span>(o =&gt;
+    o.<span class="meth">AddPolicy</span>(<span class="str">"Over18"</span>, p =&gt; p.<span class="meth">RequireClaim</span>(<span class="str">"age"</span>, <span class="cmt">/* ... */</span>)));
+<span class="cmt">// usage</span>
+<span class="anno">[Authorize(Policy = <span class="str">"Over18"</span>)]</span></pre></div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Roles are really just claims</div>
+        Under the hood a role is a claim of type <code class="inline">role</code>. Policies are the most flexible: they can combine multiple claim checks, custom requirements, and handlers. Saying "I'd reach for policy-based authorization for anything beyond a trivial role check" reads as senior.
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Refresh Tokens &amp; OAuth/OIDC</h2><div class="ch-sub">Token lifetimes and the delegated-auth picture</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — Access tokens vs refresh tokens</div>
+      <p>A JWT access token is deliberately <strong>short-lived</strong> (minutes) — if stolen, it expires fast. But forcing users to log in every few minutes is awful. The fix: a long-lived <strong>refresh token</strong>, stored securely, that the client exchanges for a new access token when the old one expires.</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">1</div><div class="flow-text"><div>Login → server returns <strong>access token</strong> (short) + <strong>refresh token</strong> (long)</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);"><div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">2</div><div class="flow-text"><div>Access token expires → client sends refresh token to a <code class="inline">/refresh</code> endpoint</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">3</div><div class="flow-text"><div>Server validates it (often stored server-side so it can be revoked) → issues a fresh access token</div></div></div>
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 The trade-off, stated</div>
+        Access tokens are stateless and fast but can't be revoked before expiry — so keep them short. Refresh tokens are usually stored server-side precisely so they <em>can</em> be revoked (logout, compromise). This split balances scalability with control.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — OAuth 2.0 &amp; OpenID Connect (overview)</div>
+      <p><strong>OAuth 2.0</strong> is a framework for <em>delegated authorization</em> — letting an app act on your behalf without your password ("Sign in with Google" granting limited access). <strong>OpenID Connect (OIDC)</strong> is a thin identity layer on top of OAuth 2.0 that adds <em>authentication</em> (an ID token proving who you are). Rule of thumb: OAuth = authorization/access; OIDC = "who is this user". You don't need to implement these from scratch — know what they're for.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 Security hygiene to mention</div>
+        Always HTTPS · hash passwords with a strong algorithm (bcrypt/Argon2/PBKDF2), never store plaintext · short access-token lifetimes · validate issuer/audience/signature · principle of least privilege. A nod to the OWASP Top 10 (injection, broken auth, etc.) shows breadth.
+      </div>
+    </div>
+  </div>
+
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Authentication vs authorization?</div><div class="interview-a"><span class="a-label">A</span>Authentication verifies who you are (identity, via credentials or a token); authorization decides what you're allowed to do once identified. AuthN runs first. Failing AuthN gives 401; passing AuthN but failing AuthZ gives 403.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>What is a JWT and how is it validated?</div><div class="interview-a"><span class="a-label">A</span>A compact signed token with three parts — header, payload (claims), and signature. The server signs it with a secret or private key; on each request the client sends it as a Bearer token and the server recomputes the signature to verify it wasn't tampered with and checks expiry. It's stateless, so no DB lookup or session is needed.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Is a JWT encrypted?</div><div class="interview-a"><span class="a-label">A</span>No — by default it's only Base64-encoded and signed, so the payload is readable by anyone. Signing guarantees integrity, not secrecy. So you never put sensitive data in it and always use HTTPS.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>Why use refresh tokens?</div><div class="interview-a"><span class="a-label">A</span>Access tokens are kept short-lived so a stolen one expires quickly, but you don't want users logging in constantly. A long-lived refresh token, usually stored server-side so it can be revoked, is exchanged for a new access token when the old one expires — balancing scalability with the ability to revoke.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>Role-based vs policy-based authorization?</div><div class="interview-a"><span class="a-label">A</span>Role-based checks a simple role claim like [Authorize(Roles="Admin")] — good for coarse buckets. Policy-based defines named, reusable rules that can combine multiple claim checks and custom requirements. Roles are really just claims; policies are the flexible modern approach for anything non-trivial.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>Difference between OAuth and OpenID Connect?</div><div class="interview-a"><span class="a-label">A</span>OAuth 2.0 is a delegated authorization framework — granting an app limited access on your behalf. OpenID Connect is an identity layer on top of OAuth that adds authentication via an ID token. OAuth answers "what can this app access"; OIDC answers "who is this user".</div></div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>AuthN vs AuthZ + 401 vs 403</span></li>
+          <li><span class="check">✓</span><span>JWT structure, claims, stateless validation</span></li>
+          <li><span class="check">✓</span><span>Signed ≠ encrypted; always HTTPS</span></li>
+          <li><span class="check">✓</span><span>UseAuthentication before UseAuthorization; [Authorize]</span></li>
+          <li><span class="check">✓</span><span>Roles vs claims vs policies</span></li>
+          <li><span class="check">✓</span><span>Access vs refresh tokens and why</span></li>
+          <li><span class="check">✓</span><span>OAuth vs OIDC at a high level; password hashing</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Implementing a full OAuth server from scratch</span></li>
+          <li><span class="check">○</span><span>Every OAuth grant type (know auth-code + client-credentials)</span></li>
+          <li><span class="check">○</span><span>Deep IdentityServer/Duende configuration</span></li>
+          <li><span class="check">○</span><span>Custom AuthorizationHandler internals beyond awareness</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>AuthN</strong> = who are you (401 if fails). <strong>AuthZ</strong> = what can you do (403 if fails). AuthN first.</div>
+      <div class="rev-item"><strong>JWT:</strong> header.payload.signature (Base64URL). Claims in payload. Sent as <code>Authorization: Bearer</code>.</div>
+      <div class="rev-item"><strong>Validation:</strong> server recomputes signature + checks exp. Stateless — no DB/session lookup.</div>
+      <div class="rev-item"><strong>Signed ≠ encrypted:</strong> payload is readable. No secrets inside; always HTTPS.</div>
+      <div class="rev-item"><strong>Pipeline:</strong> <code>UseAuthentication</code> (sets HttpContext.User) → <code>UseAuthorization</code> (enforces [Authorize]). Order matters.</div>
+      <div class="rev-item"><strong>AuthZ styles:</strong> roles ([Authorize(Roles)]) · claims · policies (reusable, flexible — default for complex rules).</div>
+      <div class="rev-item"><strong>Tokens:</strong> access = short-lived stateless; refresh = long-lived, stored server-side, revocable → new access token.</div>
+      <div class="rev-item"><strong>OAuth2</strong> = delegated authorization; <strong>OIDC</strong> = identity layer (ID token) on top. Hash passwords (bcrypt/Argon2).</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>
