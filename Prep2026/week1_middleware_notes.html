@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 — ASP.NET Core Middleware Pipeline</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR NAV -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · ASP.NET Core</div>
+    <h1>Middleware Pipeline</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — What is Middleware?</a>
+  <a class="nav-item" href="#ch2">02 — Internal Architecture</a>
+  <a class="nav-item" href="#ch3">03 — Writing Middleware</a>
+  <a class="nav-item" href="#ch4">04 — Built-in Pipeline Order</a>
+  <a class="nav-item" href="#ch5">05 — Advanced Patterns</a>
+  <a class="nav-item" href="#ch6">06 — Common Mistakes</a>
+  <a class="nav-item" href="#ch7">07 — Interview Prep</a>
+  <a class="nav-item" href="#ch8">08 — What to Know at 4 YOE</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 1</div>
+    <h1>The Middleware Pipeline in ASP.NET Core</h1>
+    <p>A complete, structured reference covering the middleware pipeline from first principles — how it works internally, how to write it, how to order it, and how to talk about it confidently in an interview at the 4 YOE level.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> .NET 8 / ASP.NET Core</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- ════════════════ CHAPTER 1 ════════════════ -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-num">01</div>
+      <div>
+        <h2>What is Middleware?</h2>
+        <div class="ch-sub">Concept, Definition, and the Mental Model</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.1 — The Problem Middleware Solves
+      </div>
+      <p>Before ASP.NET Core, the classic ASP.NET Framework relied on <strong>HttpModules</strong> and <strong>HttpHandlers</strong> to process HTTP requests. These components were tightly coupled to IIS — the Microsoft web server — which meant you couldn't run them on Linux, couldn't reorder them easily, and testing them in isolation was painful.</p>
+      <p>When the ASP.NET Core team redesigned the framework from scratch, they introduced a new, clean abstraction: the <strong>middleware pipeline</strong>. This is a sequence of software components — called <em>middleware</em> — through which every HTTP request passes before reaching your application logic, and through which every HTTP response passes on its way back to the client.</p>
+
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition</div>
+        <strong>Middleware</strong> is a software component that sits in the HTTP request-response pipeline. Each middleware component receives an incoming <code class="inline">HttpContext</code> object, performs some work (logging, authentication, routing, etc.), and then either passes control to the <em>next</em> middleware in the chain, or short-circuits the pipeline by returning a response immediately without calling the next component.
+      </div>
+
+      <p>Every middleware is aware of two things: what comes before it (because it was called by the previous middleware) and what comes after it (because it holds a reference to the next middleware, called the <code class="inline">RequestDelegate</code>). This creates a chain, often described as a <em>Russian nesting doll</em> or <em>Matryoshka</em> structure.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.2 — The Matryoshka Mental Model
+      </div>
+      <p>Imagine each middleware as a layer of the Russian nesting doll. A request enters the outermost layer, travels inward through each layer until it reaches the core handler (your controller or endpoint), and then the response travels outward through each layer in reverse order. This is why middleware can do work <em>both before and after</em> the rest of the pipeline runs.</p>
+
+      <!-- MATRYOSHKA VISUAL -->
+      <div class="matryoshka">
+        <div class="m-layer" style="background:var(--purple-50); border: 2px solid var(--purple-200); color: var(--purple-800); padding-top:14px;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:1px;opacity:0.6;">OUTERMOST — Runs first on request, last on response</span>
+          <div style="font-size:14px; margin-top:4px;">🛡️ Exception Handler Middleware</div>
+          <div style="margin: 12px 4px 4px;">
+            <div class="m-layer" style="background:var(--blue-50); border: 2px solid var(--blue-200); color: var(--blue-800);">
+              🔀 HTTPS Redirection + Static Files
+              <div style="margin: 10px 4px 4px;">
+                <div class="m-layer" style="background:var(--teal-50); border: 2px solid var(--teal-200); color: var(--teal-800);">
+                  🗺️ Routing Middleware
+                  <div style="margin: 10px 4px 4px;">
+                    <div class="m-layer" style="background:var(--amber-50); border: 2px solid var(--amber-200); color: var(--amber-800);">
+                      🔑 Authentication Middleware
+                      <div style="margin: 10px 4px 4px;">
+                        <div class="m-layer" style="background:var(--coral-50); border: 2px solid var(--coral-200); color: var(--coral-800);">
+                          🧱 Authorization Middleware
+                          <div style="margin: 10px 4px 4px;">
+                            <div class="m-layer" style="background:var(--gray-100); border: 2px solid var(--gray-200); color: var(--gray-900); text-align:center;">
+                              ⚙️ <strong>Controller / Endpoint Handler</strong><br/><span style="font-size:11px;font-weight:400;">The actual application logic</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 Key Insight</div>
+        The request travels from <strong>top to bottom</strong> (outer to inner). The response travels from <strong>bottom to top</strong> (inner to outer). This means each middleware has an opportunity to both pre-process the request and post-process the response.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.3 — Real-World Analogy: Airport Security
+      </div>
+      <p>Think of the middleware pipeline as the stages a passenger goes through at an airport. Each checkpoint is a middleware component. The passenger is the HTTP request.</p>
+
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);">
+          <div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div>
+          <div class="flow-text">
+            <div>Check-in Counter</div>
+            <div class="flow-note" style="color:var(--purple-600);">→ Analogous to Routing — the request is identified and directed correctly</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);">
+          <div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">2</div>
+          <div class="flow-text">
+            <div>Security Scanner</div>
+            <div class="flow-note" style="color:var(--blue-600);">→ Analogous to Authentication — verifying who the passenger is</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);">
+          <div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div>
+          <div class="flow-text">
+            <div>Passport Control</div>
+            <div class="flow-note" style="color:var(--teal-600);">→ Analogous to Authorization — checking if the person has permission</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);">
+          <div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">4</div>
+          <div class="flow-text">
+            <div>Boarding Gate</div>
+            <div class="flow-note" style="color:var(--amber-600);">→ Analogous to the Controller/Endpoint — the actual destination</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--coral-50); border-color:var(--coral-400);">
+          <div class="flow-num" style="background:var(--coral-100);color:var(--coral-800);">↩</div>
+          <div class="flow-text">
+            <div>Exit stamps on way back</div>
+            <div class="flow-note" style="color:var(--coral-600);">→ Response flows back through each middleware in reverse order</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Important Note</div>
+        If security rejects the passenger at step 2 (because the person has no valid ID), they never reach the boarding gate. This is exactly what <strong>short-circuiting</strong> means in middleware — stopping the pipeline at a particular point and returning a response early, without calling any further middleware.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 2 ════════════════ -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header">
+      <div class="chapter-num">02</div>
+      <div>
+        <h2>Internal Architecture</h2>
+        <div class="ch-sub">How the Pipeline is Constructed at Startup</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.1 — The RequestDelegate Chain
+      </div>
+      <p>At the heart of the middleware system is a delegate called <code class="inline">RequestDelegate</code>. Its signature is deceptively simple:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span></div>
+        <pre><span class="kw">public</span> <span class="kw">delegate</span> <span class="type">Task</span> <span class="type">RequestDelegate</span>(<span class="type">HttpContext</span> context);</pre>
+      </div>
+
+      <p>Every middleware component receives a <code class="inline">RequestDelegate</code> pointing to the <em>next</em> middleware in the chain. When a middleware calls <code class="inline">await next(context)</code>, it is literally invoking the next middleware's handler function. When a middleware does <em>not</em> call <code class="inline">next</code>, the pipeline stops at that point.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.2 — How IApplicationBuilder Builds the Chain
+      </div>
+      <p>When you call <code class="inline">app.Use()</code>, <code class="inline">app.Run()</code>, or <code class="inline">app.UseMiddleware&lt;T&gt;()</code> in <code class="inline">Program.cs</code>, you are not immediately running the middleware. Instead, you are registering a <strong>middleware factory</strong> — a function that, when given the next <code class="inline">RequestDelegate</code>, produces the current middleware's <code class="inline">RequestDelegate</code>.</p>
+      <p>The type of each factory is:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span></div>
+        <pre><span class="type">Func</span>&lt;<span class="type">RequestDelegate</span>, <span class="type">RequestDelegate</span>&gt;</pre>
+      </div>
+      <p><code class="inline">IApplicationBuilder</code> stores a list of these factories internally. At application startup, ASP.NET Core calls <code class="inline">Build()</code> on the <code class="inline">IApplicationBuilder</code>. The <code class="inline">Build()</code> method iterates through the registered factories <strong>in reverse order</strong>, chaining each one to the next, and produces a single composed <code class="inline">RequestDelegate</code> that represents the entire pipeline.</p>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Critical Fact for Interviews</div>
+        <strong>The pipeline is built exactly once at application startup and reused for every request.</strong> This means constructing the pipeline has no per-request overhead. Middleware objects themselves behave like singletons in terms of their lifecycle within the pipeline structure.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.3 — Visualising Request and Response Flow
+      </div>
+      <p>A common way to draw the pipeline in an interview is as a linear sequence where each middleware wraps the next. Below is a clean representation of how the request flows in, and the response flows back out:</p>
+
+      <div style="background:#1e1e2e; border-radius:10px; padding:20px 24px; font-family:'Fira Code',monospace; font-size:13px; color:#cdd6f4; line-height:2; margin:16px 0;">
+        <div style="color:#89dceb; margin-bottom:8px;">// Request → (top to bottom) | Response ← (bottom to top)</div>
+        <div>
+          <span style="color:#fab387;">Client Request</span> ──►<br/>
+          &nbsp;&nbsp;<span style="color:#cba6f7;">[ExceptionHandlerMiddleware]</span> &nbsp;before↓ &nbsp;after↑<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#89b4fa;">[HttpsRedirectionMiddleware]</span> &nbsp;before↓ &nbsp;after↑<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a6e3a1;">[RoutingMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;before↓ &nbsp;after↑<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f38ba8;">[AuthMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;before↓ &nbsp;after↑<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#fab387;">[AuthZMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;before↓ &nbsp;after↑<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94e2d5;">⚙️ Controller/Endpoint Handler</span><br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#fab387;">[AuthZMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;◄── after runs<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#f38ba8;">[AuthMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;◄── after runs<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#a6e3a1;">[RoutingMiddleware]</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;◄── after runs<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#89b4fa;">[HttpsRedirectionMiddleware]</span> ◄── after runs<br/>
+          &nbsp;&nbsp;<span style="color:#cba6f7;">[ExceptionHandlerMiddleware]</span> &nbsp;◄── after runs (catches any exception here)<br/>
+          <span style="color:#fab387;">◄── Response sent to Client</span>
+        </div>
+      </div>
+
+      <p>Notice that <code class="inline">ExceptionHandlerMiddleware</code> is registered <em>first</em> (outermost) so that its "after" logic runs <em>last</em>, making it the catch-all safety net for the entire pipeline.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 3 ════════════════ -->
+  <div class="chapter ch-blue" id="ch3">
+    <div class="chapter-header">
+      <div class="chapter-num">03</div>
+      <div>
+        <h2>Writing Middleware</h2>
+        <div class="ch-sub">Three Approaches — Lambda, Terminal, and Class-Based</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.1 — Overview of All Three Approaches
+      </div>
+      <p>ASP.NET Core gives you three ways to write and register middleware. Understanding all three — when to use each and why — is a key interview topic at the 4 YOE level.</p>
+
+      <div class="method-cards">
+        <div class="method-card" style="border-color: var(--purple-200);">
+          <div class="method-card-head" style="background:var(--purple-50); color:var(--purple-800);">app.Use()</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Inline lambda</li>
+              <li>Calls <code class="inline">next()</code> to continue</li>
+              <li>Good for quick, simple logic</li>
+              <li>Not suitable for complex or reusable middleware</li>
+            </ul>
+          </div>
+        </div>
+        <div class="method-card" style="border-color: var(--coral-200);">
+          <div class="method-card-head" style="background:var(--coral-50); color:var(--coral-800);">app.Run()</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Terminal — never calls next</li>
+              <li>Always short-circuits the pipeline</li>
+              <li>Good for final response writers</li>
+              <li>Any middleware added after it is unreachable</li>
+            </ul>
+          </div>
+        </div>
+        <div class="method-card" style="border-color: var(--teal-200);">
+          <div class="method-card-head" style="background:var(--teal-50); color:var(--teal-800);">Class-based ⭐</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Convention-based class</li>
+              <li>Production standard</li>
+              <li>Supports DI injection</li>
+              <li>Registered via extension method</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.2 — Approach 1: Inline Lambda with app.Use()
+      </div>
+      <p>The simplest form of middleware is a lambda function passed to <code class="inline">app.Use()</code>. This form is appropriate for one-liners or small, non-reusable logic. The lambda receives the <code class="inline">HttpContext</code> and a <code class="inline">RequestDelegate</code> named <code class="inline">next</code>.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs</span></div>
+        <pre><span class="cmt">// Inline lambda middleware</span>
+app.<span class="meth">Use</span>(<span class="kw">async</span> (context, next) =>
+{
+    <span class="cmt">// Code here runs BEFORE the next middleware</span>
+    Console.<span class="meth">WriteLine</span>(<span class="str">$"[BEFORE] {context.Request.Path}"</span>);
+
+    <span class="kw">await</span> <span class="meth">next</span>(context);  <span class="cmt">// Pass control to the next middleware</span>
+
+    <span class="cmt">// Code here runs AFTER the next middleware has completed</span>
+    Console.<span class="meth">WriteLine</span>(<span class="str">$"[AFTER] Status: {context.Response.StatusCode}"</span>);
+});</pre>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Watch Out</div>
+        In older ASP.NET Core versions, the <code class="inline">next</code> parameter was a <code class="inline">Func&lt;Task&gt;</code> and called without passing context: <code class="inline">await next()</code>. In .NET 6+ and the minimal API style, <code class="inline">next</code> is a <code class="inline">RequestDelegate</code> and you must pass the context explicitly: <code class="inline">await next(context)</code>. Both styles still exist in codebases you will encounter.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.3 — Approach 2: Terminal Middleware with app.Run()
+      </div>
+      <p>A middleware registered with <code class="inline">app.Run()</code> is always terminal — it does not receive a <code class="inline">next</code> parameter and never calls the next component. The pipeline ends here and the response is written immediately.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs</span></div>
+        <pre><span class="cmt">// Terminal middleware — pipeline ends here</span>
+app.<span class="meth">Run</span>(<span class="kw">async</span> context =>
+{
+    context.Response.StatusCode = <span class="num">200</span>;
+    <span class="kw">await</span> context.Response.<span class="meth">WriteAsync</span>(<span class="str">"Pipeline ends here. No further middleware runs."</span>);
+});
+
+<span class="cmt">// Any middleware registered AFTER app.Run() is NEVER executed</span>
+app.<span class="meth">Use</span>(<span class="kw">async</span> (context, next) => { <span class="cmt">/* This is unreachable */</span> });</pre>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Remember</div>
+        <code class="inline">app.Run()</code> is appropriate when you want to write a final "catch-all" response. For example, a health-check endpoint that writes <code class="inline">200 OK</code> for <code class="inline">/health</code> and nothing else. In practice, you typically use it as the final fallback at the bottom of the pipeline.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.4 — Approach 3: Class-Based (Convention) Middleware ⭐ Production Standard
+      </div>
+      <p>For any real-world middleware beyond trivial logic, you should write a dedicated class. This is the pattern used by all of ASP.NET Core's built-in middlewares. The convention requires:</p>
+      <ul style="font-size:14px; color:#2a2a2a; padding-left:22px; line-height:2; margin:10px 0;">
+        <li>A public class with a constructor that accepts a <code class="inline">RequestDelegate</code> as its first parameter.</li>
+        <li>A public method named <code class="inline">InvokeAsync</code> (or <code class="inline">Invoke</code>) that accepts <code class="inline">HttpContext</code> as its first parameter and returns <code class="inline">Task</code>.</li>
+      </ul>
+      <p>Here is a complete, production-grade example of a request timing and logging middleware:</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Middleware/RequestLoggingMiddleware.cs</span></div>
+        <pre><span class="kw">using</span> System.Diagnostics;
+
+<span class="kw">public class</span> <span class="type">RequestLoggingMiddleware</span>
+{
+    <span class="kw">private readonly</span> <span class="type">RequestDelegate</span> _next;
+    <span class="kw">private readonly</span> <span class="type">ILogger</span>&lt;<span class="type">RequestLoggingMiddleware</span>&gt; _logger;
+
+    <span class="cmt">// Constructor — ASP.NET Core injects RequestDelegate and singleton/transient services here</span>
+    <span class="kw">public</span> <span class="meth">RequestLoggingMiddleware</span>(
+        <span class="type">RequestDelegate</span> next,
+        <span class="type">ILogger</span>&lt;<span class="type">RequestLoggingMiddleware</span>&gt; logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    <span class="cmt">// InvokeAsync is called for every HTTP request</span>
+    <span class="kw">public async</span> <span class="type">Task</span> <span class="meth">InvokeAsync</span>(<span class="type">HttpContext</span> context)
+    {
+        <span class="kw">var</span> sw = <span class="type">Stopwatch</span>.<span class="meth">StartNew</span>();
+
+        _logger.<span class="meth">LogInformation</span>(
+            <span class="str">"→ Incoming Request: {Method} {Path}"</span>,
+            context.Request.Method,
+            context.Request.Path);
+
+        <span class="kw">await</span> <span class="meth">_next</span>(context);  <span class="cmt">// Passes to next middleware / endpoint</span>
+
+        sw.<span class="meth">Stop</span>();
+        _logger.<span class="meth">LogInformation</span>(
+            <span class="str">"← Response: {StatusCode} in {ElapsedMs}ms"</span>,
+            context.Response.StatusCode,
+            sw.ElapsedMilliseconds);
+    }
+}</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Middleware/RequestLoggingMiddlewareExtensions.cs</span></div>
+        <pre><span class="cmt">// Extension method — this is the clean, production way to register custom middleware</span>
+<span class="kw">public static class</span> <span class="type">RequestLoggingMiddlewareExtensions</span>
+{
+    <span class="kw">public static</span> <span class="type">IApplicationBuilder</span> <span class="meth">UseRequestLogging</span>(
+        <span class="kw">this</span> <span class="type">IApplicationBuilder</span> app)
+    {
+        <span class="kw">return</span> app.<span class="meth">UseMiddleware</span>&lt;<span class="type">RequestLoggingMiddleware</span>&gt;();
+    }
+}
+
+<span class="cmt">// Program.cs — Clean, readable registration:</span>
+app.<span class="meth">UseRequestLogging</span>();  <span class="cmt">// vs. app.UseMiddleware&lt;RequestLoggingMiddleware&gt;() directly</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">✅ Best Practice</div>
+        Always create an extension method (<code class="inline">UseXxx</code>) for your custom middleware. This is how all built-in ASP.NET Core middleware is registered (<code class="inline">UseAuthentication()</code>, <code class="inline">UseRouting()</code>, etc.) and it makes your <code class="inline">Program.cs</code> clean and readable.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.5 — Scoped Service Injection: The InvokeAsync Pattern
+      </div>
+      <p>This is one of the most important nuances of middleware and a frequent interview question. Because middleware classes are constructed <em>once at startup</em> (essentially singleton behavior), you cannot inject <strong>scoped services</strong> (like a <code class="inline">DbContext</code> or a repository that is scoped per-request) through the constructor. Doing so creates what is known as the <strong>Captive Dependency</strong> problem — the scoped service would be held alive for the entire application lifetime, causing incorrect behavior and data leaks.</p>
+
+      <p>The solution is to inject scoped services as additional parameters to <code class="inline">InvokeAsync</code>. ASP.NET Core's middleware activation mechanism supports method injection — it resolves additional parameters of <code class="inline">InvokeAsync</code> from the per-request DI scope.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Correct: Scoped Service via InvokeAsync</span></div>
+        <pre><span class="kw">public class</span> <span class="type">CurrentUserMiddleware</span>
+{
+    <span class="kw">private readonly</span> <span class="type">RequestDelegate</span> _next;
+    <span class="cmt">// ✅ ILogger is a singleton — safe to inject via constructor</span>
+    <span class="kw">private readonly</span> <span class="type">ILogger</span>&lt;<span class="type">CurrentUserMiddleware</span>&gt; _logger;
+
+    <span class="kw">public</span> <span class="meth">CurrentUserMiddleware</span>(<span class="type">RequestDelegate</span> next,
+        <span class="type">ILogger</span>&lt;<span class="type">CurrentUserMiddleware</span>&gt; logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    <span class="cmt">// ✅ IUserRepository is scoped — inject here, NOT in constructor</span>
+    <span class="kw">public async</span> <span class="type">Task</span> <span class="meth">InvokeAsync</span>(<span class="type">HttpContext</span> context,
+        <span class="type">IUserRepository</span> userRepository) <span class="cmt">// ← per-request scope</span>
+    {
+        <span class="kw">var</span> userId = context.User.FindFirst(<span class="str">"sub"</span>)?.Value;
+        <span class="kw">if</span> (userId != <span class="kw">null</span>)
+        {
+            <span class="kw">var</span> user = <span class="kw">await</span> userRepository.<span class="meth">GetByIdAsync</span>(userId);
+            context.Items[<span class="str">"CurrentUser"</span>] = user;
+        }
+        <span class="kw">await</span> <span class="meth">_next</span>(context);
+    }
+}</pre>
+      </div>
+
+      <div class="callout danger">
+        <div class="callout-label">❌ Never Do This</div>
+        Never inject a <strong>scoped service</strong> (like <code class="inline">AppDbContext</code> or <code class="inline">IUserRepository</code> with scoped lifetime) through the constructor of a middleware class. The middleware lives as long as the application — so the scoped service will never be disposed and will hold database connections indefinitely.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        3.6 — Sharing Data Between Middlewares: HttpContext.Items
+      </div>
+      <p>Often, an upstream middleware (e.g., one that resolves the current user from a JWT) needs to pass data to a downstream middleware or controller. The appropriate mechanism for this is <code class="inline">HttpContext.Items</code>, which is a <code class="inline">IDictionary&lt;object, object?&gt;</code> that is scoped to the lifetime of a single HTTP request.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Passing data downstream via HttpContext.Items</span></div>
+        <pre><span class="cmt">// In Middleware A — writing data</span>
+context.Items[<span class="str">"CorrelationId"</span>] = <span class="type">Guid</span>.<span class="meth">NewGuid</span>().<span class="meth">ToString</span>();
+
+<span class="cmt">// In Middleware B (downstream) or in a Controller — reading data</span>
+<span class="kw">var</span> correlationId = context.Items[<span class="str">"CorrelationId"</span>] <span class="kw">as string</span>;
+
+<span class="cmt">// In a Controller (via IHttpContextAccessor)</span>
+<span class="kw">var</span> correlationId = _httpContextAccessor.HttpContext?.Items[<span class="str">"CorrelationId"</span>];</pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 Pro Tip</div>
+        To avoid <code class="inline">Items</code> key collisions in large codebases (especially when using third-party middleware), use <strong>typed keys</strong> rather than plain strings. Define a static class with unique key objects, or use the type itself as the key: <code class="inline">context.Items[typeof(CurrentUser)] = user;</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 4 ════════════════ -->
+  <div class="chapter ch-coral" id="ch4">
+    <div class="chapter-header">
+      <div class="chapter-num">04</div>
+      <div>
+        <h2>Built-in Pipeline & Ordering</h2>
+        <div class="ch-sub">The Correct Sequence and Why It Matters</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        4.1 — Why Order is Non-Negotiable
+      </div>
+      <p>Order is not a matter of style in ASP.NET Core middleware — it is a matter of <em>correctness</em>. Placing a middleware in the wrong position causes real, often subtle bugs. The most common interview question in this area is: "What is the correct order of middleware in ASP.NET Core and why?" Here is the answer, with explanation for each decision.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        4.2 — The Standard Pipeline Order (.NET 8)
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs — Correct Middleware Order</span></div>
+        <pre><span class="kw">var</span> builder = <span class="type">WebApplication</span>.<span class="meth">CreateBuilder</span>(args);
+builder.Services.<span class="meth">AddControllers</span>();
+<span class="kw">var</span> app = builder.<span class="meth">Build</span>();
+
+<span class="cmt">// ① Must be first — it wraps everything so it can catch all exceptions</span>
+app.<span class="meth">UseExceptionHandler</span>(<span class="str">"/error"</span>);
+
+<span class="cmt">// ② Redirects HTTP → HTTPS early, before any real processing</span>
+app.<span class="meth">UseHttpsRedirection</span>();
+
+<span class="cmt">// ③ Serves files from wwwroot, short-circuits if a static file matches</span>
+app.<span class="meth">UseStaticFiles</span>();
+
+<span class="cmt">// ④ Resolves which endpoint the request maps to (adds endpoint metadata)</span>
+app.<span class="meth">UseRouting</span>();
+
+<span class="cmt">// ⑤ Reads the JWT/cookie and populates HttpContext.User</span>
+app.<span class="meth">UseAuthentication</span>();
+
+<span class="cmt">// ⑥ Checks if HttpContext.User has permission for the resolved endpoint</span>
+app.<span class="meth">UseAuthorization</span>();
+
+<span class="cmt">// ⑦ Executes the matched controller action or minimal API endpoint</span>
+app.<span class="meth">MapControllers</span>();
+
+app.<span class="meth">Run</span>();</pre>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        4.3 — Detailed Explanation of Each Position
+      </div>
+
+      <!-- PIPELINE VISUAL -->
+      <div class="pipeline-visual">
+        <div class="pipeline-stage" style="background:var(--red-50);">
+          <div class="ps-num" style="background:var(--red-100); color:var(--red-800);">1</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--red-800);">UseExceptionHandler</div><div class="ps-desc">Outermost wrapper. Any unhandled exception thrown anywhere downstream is caught here and converted to a structured error response.</div></div>
+          <span class="ps-badge" style="background:var(--red-100);color:var(--red-800);">SAFETY NET</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--amber-50);">
+          <div class="ps-num" style="background:var(--amber-100); color:var(--amber-800);">2</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--amber-800);">UseHttpsRedirection</div><div class="ps-desc">If a request arrives on plain HTTP, immediately redirect to HTTPS. Must be early — before authentication so that credentials aren't accidentally sent over plain HTTP.</div></div>
+          <span class="ps-badge" style="background:var(--amber-100);color:var(--amber-800);">SECURITY</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--gray-50);">
+          <div class="ps-num" style="background:var(--gray-100); color:var(--gray-800);">3</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--gray-800);">UseStaticFiles</div><div class="ps-desc">If the request path matches a file in wwwroot (e.g., /style.css), serve it and short-circuit. No need to run auth or routing for static assets.</div></div>
+          <span class="ps-badge" style="background:var(--gray-100);color:var(--gray-800);">PERFORMANCE</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--blue-50);">
+          <div class="ps-num" style="background:var(--blue-100); color:var(--blue-800);">4</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--blue-800);">UseRouting</div><div class="ps-desc">Resolves the matching endpoint for the request and attaches endpoint metadata (like [Authorize] attribute info) to HttpContext. Authorization depends on this metadata.</div></div>
+          <span class="ps-badge" style="background:var(--blue-100);color:var(--blue-800);">ROUTING</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--purple-50);">
+          <div class="ps-num" style="background:var(--purple-100); color:var(--purple-800);">5</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--purple-800);">UseAuthentication</div><div class="ps-desc">Reads the Authorization header or cookie, validates the token, and if valid, constructs a ClaimsPrincipal and assigns it to HttpContext.User.</div></div>
+          <span class="ps-badge" style="background:var(--purple-100);color:var(--purple-800);">WHO ARE YOU?</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--teal-50);">
+          <div class="ps-num" style="background:var(--teal-100); color:var(--teal-800);">6</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--teal-800);">UseAuthorization</div><div class="ps-desc">Reads HttpContext.User (set by Authentication) and checks if the user has the required permissions for the matched endpoint (set by Routing). Both must run first.</div></div>
+          <span class="ps-badge" style="background:var(--teal-100);color:var(--teal-800);">ARE YOU ALLOWED?</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--green-50);" style="border-radius: 0 0 10px 10px;">
+          <div class="ps-num" style="background:var(--green-100); color:var(--green-800);">7</div>
+          <div style="flex:1;"><div class="ps-name" style="color:var(--green-800);">MapControllers / Endpoint</div><div class="ps-desc">Executes the controller action or minimal API endpoint handler that was matched by routing. This is where your actual business logic runs.</div></div>
+          <span class="ps-badge" style="background:var(--green-100);color:var(--green-800);">BUSINESS LOGIC</span>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <div class="callout-label">❌ Classic Bug</div>
+        If you place <code class="inline">UseAuthorization()</code> before <code class="inline">UseAuthentication()</code>, the <code class="inline">HttpContext.User</code> will be an empty, unauthenticated identity when authorization runs. Every request will fail with 403 Forbidden, even with a valid token. Similarly, placing <code class="inline">UseAuthentication()</code> before <code class="inline">UseRouting()</code> means the endpoint metadata — including <code class="inline">[AllowAnonymous]</code> attributes — is not yet available, causing incorrect authorization decisions.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        4.4 — Short-Circuiting the Pipeline
+      </div>
+      <p>A middleware short-circuits the pipeline by simply not calling <code class="inline">next(context)</code> and instead writing directly to the response. This is a deliberate, controlled stop of the request pipeline — used for API key validation, authentication failures, maintenance mode, rate limiting, etc.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">ApiKeyMiddleware.cs — Short-circuit example</span></div>
+        <pre><span class="kw">public async</span> <span class="type">Task</span> <span class="meth">InvokeAsync</span>(<span class="type">HttpContext</span> context)
+{
+    <span class="kw">if</span> (!context.Request.Headers.<span class="meth">TryGetValue</span>(<span class="str">"X-Api-Key"</span>, <span class="kw">out var</span> extractedApiKey))
+    {
+        <span class="cmt">// ❌ No API key header — short-circuit here</span>
+        context.Response.StatusCode = <span class="num">401</span>;
+        <span class="kw">await</span> context.Response.<span class="meth">WriteAsync</span>(<span class="str">"Missing API Key."</span>);
+        <span class="kw">return</span>;  <span class="cmt">// ← Pipeline stops. No next() called. No controller runs.</span>
+    }
+
+    <span class="kw">if</span> (extractedApiKey != _validApiKey)
+    {
+        context.Response.StatusCode = <span class="num">401</span>;
+        <span class="kw">await</span> context.Response.<span class="meth">WriteAsync</span>(<span class="str">"Invalid API Key."</span>);
+        <span class="kw">return</span>;
+    }
+
+    <span class="cmt">// ✅ Valid API key — continue to the next middleware</span>
+    <span class="kw">await</span> <span class="meth">_next</span>(context);
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 5 ════════════════ -->
+  <div class="chapter ch-amber" id="ch5">
+    <div class="chapter-header">
+      <div class="chapter-num">05</div>
+      <div>
+        <h2>Advanced Patterns</h2>
+        <div class="ch-sub">Map, UseWhen, MapWhen — Branching the Pipeline</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--amber-200);"></div>
+        5.1 — Branching with Map()
+      </div>
+      <p>The <code class="inline">app.Map()</code> method creates a separate sub-pipeline that runs only for requests whose path starts with a given prefix. Requests that match the branch path do not continue into the main pipeline. This is useful for creating completely separate request handling areas — such as a health-check endpoint, a WebSocket endpoint, or a maintenance-mode handler.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Branching with Map()</span></div>
+        <pre>app.<span class="meth">Map</span>(<span class="str">"/health"</span>, healthApp =>
+{
+    <span class="cmt">// This sub-pipeline ONLY handles requests to /health</span>
+    healthApp.<span class="meth">Run</span>(<span class="kw">async</span> context =>
+    {
+        context.Response.ContentType = <span class="str">"application/json"</span>;
+        <span class="kw">await</span> context.Response.<span class="meth">WriteAsync</span>(<span class="str">"{ \"status\": \"healthy\" }"</span>);
+    });
+});
+
+<span class="cmt">// The main pipeline only runs for requests that do NOT start with /health</span>
+app.<span class="meth">UseRouting</span>();
+app.<span class="meth">UseAuthentication</span>();
+app.<span class="meth">UseAuthorization</span>();
+app.<span class="meth">MapControllers</span>();</pre>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--amber-200);"></div>
+        5.2 — Conditional Middleware with UseWhen()
+      </div>
+      <p>Unlike <code class="inline">Map()</code>, <code class="inline">UseWhen()</code> does not create a permanent fork — after the conditional branch executes, the request continues in the main pipeline. It runs a custom middleware sub-pipeline only when a predicate is true.</p>
+
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">UseWhen — runs only for /api paths</span></div>
+        <pre>app.<span class="meth">UseWhen</span>(
+    context => context.Request.Path.<span class="meth">StartsWithSegments</span>(<span class="str">"/api"</span>),
+    apiApp =>
+    {
+        <span class="cmt">// This extra middleware only runs for /api/* requests</span>
+        apiApp.<span class="meth">Use</span>(<span class="kw">async</span> (context, next) =>
+        {
+            Console.<span class="meth">WriteLine</span>(<span class="str">"API-specific middleware running"</span>);
+            <span class="kw">await</span> <span class="meth">next</span>(context);
+        });
+    }
+);
+
+<span class="cmt">// The main pipeline continues after the branch for ALL requests</span>
+app.<span class="meth">UseRouting</span>();</pre>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Map vs UseWhen</div>
+        <strong>Map</strong>: The branch is exclusive. Requests that match the path do NOT rejoin the main pipeline afterward.<br/>
+        <strong>UseWhen</strong>: The branch is conditional. After the branch's middleware runs, the request <em>does</em> rejoin the main pipeline and continues.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 6 ════════════════ -->
+  <div class="chapter ch-coral" id="ch6">
+    <div class="chapter-header">
+      <div class="chapter-num">06</div>
+      <div>
+        <h2>Common Mistakes</h2>
+        <div class="ch-sub">What Gets Engineers Rejected in Code Reviews and Interviews</div>
+      </div>
+    </div>
+
+    <div class="mistakes-grid">
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">UseAuthorization() before UseAuthentication()</div>
+          <div class="mistake-desc">Authorization middleware checks <code class="inline">HttpContext.User</code>. If Authentication hasn't run yet, <code class="inline">User</code> is an anonymous, empty identity. Every authenticated request appears unauthorized.</div>
+          <div class="mistake-fix">✅ Fix: Always place UseAuthentication() immediately before UseAuthorization().</div>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">UseRouting() after UseAuthorization()</div>
+          <div class="mistake-desc">Routing attaches endpoint metadata (including <code class="inline">[AllowAnonymous]</code> attributes) to the request context. If routing hasn't run, authorization cannot inspect this metadata and makes incorrect decisions.</div>
+          <div class="mistake-fix">✅ Fix: UseRouting → UseAuthentication → UseAuthorization, always in this sequence.</div>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">Injecting a Scoped Service in the Constructor</div>
+          <div class="mistake-desc">Middleware lives as a singleton (effectively). Injecting a scoped service like <code class="inline">DbContext</code> in the constructor creates a "captive dependency" — the scoped service is never properly disposed and the middleware holds a stale database connection for the app's lifetime.</div>
+          <div class="mistake-fix">✅ Fix: Inject scoped services as parameters in InvokeAsync(), not the constructor.</div>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">Forgetting to await next(context)</div>
+          <div class="mistake-desc">If you write <code class="inline">_next(context);</code> without <code class="inline">await</code>, the middleware returns before the rest of the pipeline finishes executing. Post-processing code after <code class="inline">_next</code> runs before the response is ready, leading to subtle, hard-to-debug timing issues.</div>
+          <div class="mistake-fix">✅ Fix: Always write await _next(context);</div>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">Writing to the response after calling next()</div>
+          <div class="mistake-desc">Once a downstream middleware or controller writes status code and headers, the response has started. Attempting to modify headers or write to the response body after <code class="inline">_next(context)</code> returns will throw a <code class="inline">InvalidOperationException</code>.</div>
+          <div class="mistake-fix">✅ Fix: Always check context.Response.HasStarted before writing post-next. Read only; do not modify.</div>
+        </div>
+      </div>
+      <div class="mistake-item">
+        <div class="mistake-icon">❌</div>
+        <div class="mistake-body">
+          <div class="mistake-title">Placing UseExceptionHandler anywhere but first</div>
+          <div class="mistake-desc">Exception handling middleware only catches exceptions thrown by middleware that runs <em>after</em> it. Placing it anywhere other than the top means exceptions thrown before it is reached are completely unhandled.</div>
+          <div class="mistake-fix">✅ Fix: UseExceptionHandler() must be the very first middleware registered.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 7 ════════════════ -->
+  <div class="chapter ch-green" id="ch7">
+    <div class="chapter-header">
+      <div class="chapter-num">07</div>
+      <div>
+        <h2>Interview Preparation</h2>
+        <div class="ch-sub">Questions and Model Answers at the 4 YOE Level</div>
+      </div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q1</span>What is the middleware pipeline in ASP.NET Core? How is it different from HttpModules in classic ASP.NET?</div>
+      <div class="interview-a"><span class="a-label">A</span>The middleware pipeline is an ordered chain of components, each represented as a <code class="inline">RequestDelegate</code>, that processes every HTTP request and response. Unlike <code class="inline">HttpModules</code> in classic ASP.NET, which were tightly coupled to IIS and configured in <code class="inline">web.config</code>, ASP.NET Core's pipeline is fully code-driven, server-agnostic (works on Kestrel, nginx, IIS), and highly composable. You can reorder, add, or remove components in code, which also makes it testable in isolation.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q2</span>What is the difference between Use(), Run(), and Map()?</div>
+      <div class="interview-a"><span class="a-label">A</span>
+        <table class="comp-table" style="margin-top:8px;">
+          <tr><th>Method</th><th>Calls next?</th><th>Use Case</th></tr>
+          <tr><td><code class="inline">Use()</code></td><td>Optionally (you decide)</td><td>Standard middleware with before/after logic. Calls next to continue, or skips it to short-circuit.</td></tr>
+          <tr><td><code class="inline">Run()</code></td><td>Never</td><td>Terminal middleware — always ends the pipeline. Suitable for final response writers.</td></tr>
+          <tr><td><code class="inline">Map()</code></td><td>Branches</td><td>Creates an exclusive sub-pipeline for a path prefix. Requests that match do not rejoin the main pipeline.</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q3</span>Why does middleware order matter? Give a concrete example of what breaks if you get it wrong.</div>
+      <div class="interview-a"><span class="a-label">A</span>Because each middleware sees only the state left by the middlewares before it. A classic example: placing <code class="inline">UseAuthorization()</code> before <code class="inline">UseAuthentication()</code>. Authentication is responsible for reading the JWT and populating <code class="inline">HttpContext.User</code>. If authorization runs first, <code class="inline">User</code> is still an unauthenticated principal, so every protected endpoint returns 403 Forbidden even when a valid token is sent.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q4</span>What is short-circuiting in middleware? When would you use it?</div>
+      <div class="interview-a"><span class="a-label">A</span>Short-circuiting means a middleware intentionally does not call <code class="inline">next(context)</code>, preventing any further middleware or controllers from running. It is used when the request should be rejected or handled entirely at this stage — for example, an API key middleware that returns 401 if no valid key is present, a rate limiter that returns 429 if the client has exceeded their quota, or a maintenance mode middleware that returns 503 for all traffic during a deployment.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q5</span>Why can't you inject a scoped service in a middleware's constructor? How do you solve this?</div>
+      <div class="interview-a"><span class="a-label">A</span>Middleware is constructed once at application startup and reused for every request — so its constructor dependencies are resolved only once and kept for the application's entire lifetime. Scoped services are designed to live for one request and then be disposed. If you inject a scoped service in a middleware constructor, it becomes a captive dependency: never disposed, holding resources (like database connections) indefinitely. The solution is to inject scoped services as additional parameters in <code class="inline">InvokeAsync()</code>. ASP.NET Core resolves these parameters from the per-request DI scope, so they are properly created and disposed for each request.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q6</span>What is the difference between middleware and MVC filters?</div>
+      <div class="interview-a"><span class="a-label">A</span>Middleware operates at the HTTP pipeline level, before MVC or routing. It runs on every request, regardless of whether it eventually reaches a controller or not. Filters are part of MVC's action execution pipeline and only run for requests that have matched a controller action. Filters have access to richer MVC context — <code class="inline">ActionContext</code>, <code class="inline">ModelState</code>, action arguments — that middleware cannot access. Choose middleware for cross-cutting concerns that apply broadly (logging, auth, CORS, compression); choose filters for concerns specific to controller actions (input validation, action-level caching, model binding customisation).</div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 8 ════════════════ -->
+  <div class="chapter ch-blue" id="ch8">
+    <div class="chapter-header">
+      <div class="chapter-num">08</div>
+      <div>
+        <h2>What a 4 YOE Engineer Must Know</h2>
+        <div class="ch-sub">Interview ROI Matrix — What to Master vs. What to Skip</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--teal-800); margin-bottom:10px; padding: 8px 12px; background:var(--teal-50); border-radius:8px;">✅ Must Know (High ROI)</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Explain the pipeline flow clearly, including request→response bidirectionality</span></li>
+          <li><span class="check">✓</span><span>Articulate the difference between Use(), Run(), and Map() with examples</span></li>
+          <li><span class="check">✓</span><span>Write a complete class-based middleware with constructor injection and InvokeAsync</span></li>
+          <li><span class="check">✓</span><span>Explain the correct built-in middleware ordering and the reason for each position</span></li>
+          <li><span class="check">✓</span><span>Explain the captive dependency trap and the InvokeAsync injection solution</span></li>
+          <li><span class="check">✓</span><span>Explain short-circuiting and implement it in code</span></li>
+          <li><span class="check">✓</span><span>Distinguish middleware from MVC filters</span></li>
+          <li><span class="check">✓</span><span>Know HttpContext.Items for per-request data sharing</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--gray-800); margin-bottom:10px; padding: 8px 12px; background:var(--gray-50); border-radius:8px;">⏭️ Can Skip for Now (Low ROI)</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>IMiddlewareFactory and the IMiddleware interface (rarely asked, rarely needed)</span></li>
+          <li><span class="check">○</span><span>Writing complex branching logic with MapWhen — understand conceptually but skip deep dive</span></li>
+          <li><span class="check">○</span><span>Custom IApplicationBuilder extension methods with complex chaining — too niche</span></li>
+          <li><span class="check">○</span><span>Kestrel-level connection middleware (low-level networking, not product backend territory)</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ QUICK REVISION BOX ════════════════ -->
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item">
+        <strong>Core concept:</strong> Ordered chain of <code>RequestDelegate</code> components, each processing request &amp; response. Built once at startup, reused per request.
+      </div>
+      <div class="rev-item">
+        <strong>Request direction:</strong> Top → Bottom.<br/>
+        <strong>Response direction:</strong> Bottom → Top.
+      </div>
+      <div class="rev-item">
+        <strong>Use()</strong> — Normal middleware; calls next optionally.<br/>
+        <strong>Run()</strong> — Terminal; never calls next.<br/>
+        <strong>Map()</strong> — Exclusive branch on path prefix.
+      </div>
+      <div class="rev-item">
+        <strong>Correct order:</strong> ExceptionHandler → Https → StaticFiles → Routing → Authentication → Authorization → Endpoint.
+      </div>
+      <div class="rev-item">
+        <strong>Scoped services:</strong> Inject in <code>InvokeAsync()</code>, NOT in constructor. Constructor = singleton lifetime. InvokeAsync = per-request scope.
+      </div>
+      <div class="rev-item">
+        <strong>Share data:</strong> Use <code>HttpContext.Items</code> to pass request-scoped data between middlewares and controllers.
+      </div>
+      <div class="rev-item">
+        <strong>Short-circuit:</strong> Don't call <code>_next(context)</code>. Return early. No more middleware runs after that point.
+      </div>
+      <div class="rev-item">
+        <strong>vs Filters:</strong> Middleware = HTTP level, all requests. Filters = MVC level, only matched actions.
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

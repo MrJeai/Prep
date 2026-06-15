@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 · M3 — ASP.NET Core Architecture & Hosting</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · Module 3</div>
+    <h1>Architecture &amp; Hosting</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — The Hosting Model</a>
+  <a class="nav-item" href="#ch2">02 — Program.cs Line by Line</a>
+  <a class="nav-item" href="#ch3">03 — Kestrel Web Server</a>
+  <a class="nav-item" href="#ch4">04 — The Request Lifecycle</a>
+  <a class="nav-item" href="#ch5">05 — HttpContext &amp; the Host</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 3 · The Spine</div>
+    <h1>ASP.NET Core Architecture &amp; Hosting</h1>
+    <p>If an interviewer asks just one ASP.NET Core question, it's usually "walk me through what happens when a request hits your API." This module is the complete answer — the hosting model, what every line of <code class="inline">Program.cs</code> sets up, what Kestrel does, and the exact path a request travels from the wire to your controller and back.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> .NET 8 / ASP.NET Core</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- CH1 -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>The Hosting Model</h2><div class="ch-sub">Who is in charge of your app's lifetime — and how that changed</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.1 — The old world: IIS was the boss</div>
+      <p>In classic ASP.NET (Framework), <strong>IIS controlled your application's lifetime.</strong> You didn't write a <code class="inline">Main()</code> method; IIS loaded your app into a worker process (<code class="inline">w3wp.exe</code>), decided when to start, recycle, and stop it, and handed requests to <code class="inline">System.Web</code>. Your code was a <em>guest</em> inside IIS. That's why old apps couldn't run without IIS and couldn't run off Windows.</p>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.2 — The new world: your app is a normal program</div>
+      <p>An ASP.NET Core app is just a <strong>console application</strong> with a <code class="inline">Main()</code> method that starts a web server. <em>You</em> own the lifetime. Inside that program, the framework builds a <strong>Host</strong> — an object that wires up and manages all the infrastructure your app needs before it can serve a single request.</p>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — The Host</div>
+        The <strong>Host</strong> is the container that sets up and owns your app's cross-cutting infrastructure: the <strong>Dependency Injection container</strong>, the <strong>configuration system</strong>, the <strong>logging system</strong>, and the <strong>web server (Kestrel)</strong>. When the host starts, all of these come to life; when it stops, they shut down gracefully. Since .NET 6, you create it with one line: <code class="inline">WebApplication.CreateBuilder(args)</code>.
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 The "minimal hosting model" (.NET 6+)</div>
+        Older Core apps split startup across two files: <code class="inline">Program.cs</code> (build the host) and <code class="inline">Startup.cs</code> (register services + configure middleware). Since .NET 6 these were merged into a single, top-level <code class="inline">Program.cs</code>. If you see <code class="inline">Startup.cs</code> with <code class="inline">ConfigureServices</code>/<code class="inline">Configure</code> methods, you're looking at an older codebase — know both, because real projects still use the old style.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH2 -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>Program.cs, Line by Line</h2><div class="ch-sub">The entry point — what each line actually does</div></div></div>
+    <div class="section">
+      <p>Here is a minimal-but-real <code class="inline">Program.cs</code>. Every line is doing something important; let's dissect it.</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Program.cs</span></div>
+        <pre><span class="cmt">// 1 — Create the builder: sets up DI, config, logging, Kestrel</span>
+<span class="kw">var</span> builder = <span class="type">WebApplication</span>.<span class="meth">CreateBuilder</span>(args);
+
+<span class="cmt">// 2 — Register services into the DI container</span>
+builder.Services.<span class="meth">AddControllers</span>();
+builder.Services.<span class="meth">AddScoped</span>&lt;<span class="type">ITaskService</span>, <span class="type">TaskService</span>&gt;();
+builder.Services.<span class="meth">AddDbContext</span>&lt;<span class="type">AppDbContext</span>&gt;(o =&gt;
+    o.<span class="meth">UseSqlServer</span>(builder.Configuration.<span class="meth">GetConnectionString</span>(<span class="str">"Default"</span>)));
+
+<span class="cmt">// 3 — Build the app (locks the DI container, creates the host)</span>
+<span class="kw">var</span> app = builder.<span class="meth">Build</span>();
+
+<span class="cmt">// 4 — Configure the middleware pipeline (ORDER MATTERS)</span>
+<span class="kw">if</span> (app.Environment.<span class="meth">IsDevelopment</span>())
+    app.<span class="meth">UseSwagger</span>().<span class="meth">UseSwaggerUI</span>();
+
+app.<span class="meth">UseHttpsRedirection</span>();
+app.<span class="meth">UseAuthentication</span>();
+app.<span class="meth">UseAuthorization</span>();
+app.<span class="meth">MapControllers</span>();
+
+<span class="cmt">// 5 — Start Kestrel and block until shutdown</span>
+app.<span class="meth">Run</span>();</pre>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>The five phases explained</div>
+      <div class="pipeline-visual">
+        <div class="pipeline-stage" style="background:var(--purple-50);"><div class="ps-num" style="background:var(--purple-200);color:var(--purple-800);">1</div><div><div class="ps-name" style="color:var(--purple-800);">CreateBuilder(args)</div><div class="ps-desc">Reads configuration (appsettings.json, env vars, command line), sets up the logging providers, the DI container, and Kestrel defaults. Returns a <code class="inline">WebApplicationBuilder</code>.</div></div></div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--teal-50);"><div class="ps-num" style="background:var(--teal-100);color:var(--teal-800);">2</div><div><div class="ps-name" style="color:var(--teal-800);">builder.Services.Add…()</div><div class="ps-desc">You register every service the app will need (controllers, your business services, DbContext, auth). This is "registration" — nothing is created yet, just recorded with a lifetime.</div></div></div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--amber-50);"><div class="ps-num" style="background:var(--amber-100);color:var(--amber-800);">3</div><div><div class="ps-name" style="color:var(--amber-800);">builder.Build()</div><div class="ps-desc">Finalises the DI container and produces the <code class="inline">WebApplication</code> object (<code class="inline">app</code>). After this you can no longer register services.</div></div></div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--blue-50);"><div class="ps-num" style="background:var(--blue-100);color:var(--blue-800);">4</div><div><div class="ps-name" style="color:var(--blue-800);">app.Use… / app.Map…</div><div class="ps-desc">You assemble the middleware pipeline in order. This defines how every request will be processed (your Module 4 material).</div></div></div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-stage" style="background:var(--green-50);"><div class="ps-num" style="background:var(--green-100);color:var(--green-800);">5</div><div><div class="ps-name" style="color:var(--green-800);">app.Run()</div><div class="ps-desc">Starts Kestrel listening on its ports and <strong>blocks the main thread</strong>, keeping the app alive until shutdown (Ctrl+C / SIGTERM).</div></div></div>
+      </div>
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Two different "Run"s — don't confuse them</div>
+        <code class="inline">app.Run()</code> (no argument) at the bottom <strong>starts the server</strong>. <code class="inline">app.Run(handler)</code> (with a delegate) is a piece of <em>terminal middleware</em>. Same word, completely different jobs — a common interview gotcha.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH3 -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>Kestrel — The Web Server</h2><div class="ch-sub">The engine that turns network bytes into an HttpContext</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.1 — What Kestrel is</div>
+      <p><strong>Kestrel</strong> is the cross-platform web server built into ASP.NET Core and written in C#. When you run <code class="inline">dotnet run</code>, Kestrel starts and listens on a port (e.g. <code class="inline">https://localhost:5001</code>). It accepts the raw TCP/HTTP connection, parses the incoming bytes into a structured <code class="inline">HttpContext</code>, hands that to your middleware pipeline, and writes the response back out to the socket.</p>
+      <div class="callout definition">
+        <div class="callout-label">📖 Mental model — the receptionist</div>
+        Kestrel is the <strong>receptionist</strong> of your application. It's the first thing every request meets. It doesn't decide <em>what</em> to do with a request — it just receives it, packages it neatly as an <code class="inline">HttpContext</code>, and passes it inside to the pipeline. The response comes back out the same door.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.2 — Why Kestrel instead of IIS?</div>
+      <p>Because IIS is Windows-only and Core had to run everywhere. Kestrel is fast, lightweight, and cross-platform, so the <em>same</em> app runs on Windows, Linux, and in containers. IIS becomes optional — in production it (or Nginx) typically sits in front of Kestrel as a <strong>reverse proxy</strong>.</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);"><div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">1</div><div class="flow-text"><div><strong>Internet → Reverse Proxy (Nginx / IIS)</strong></div><div class="flow-note" style="color:var(--blue-600);">Handles TLS/SSL termination, load balancing, request filtering, serving static files, and shielding Kestrel from the open internet.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--coral-50); border-color:var(--coral-400);"><div class="flow-num" style="background:var(--coral-100);color:var(--coral-800);">2</div><div class="flow-text"><div><strong>Reverse Proxy → Kestrel</strong></div><div class="flow-note" style="color:var(--coral-600);">Forwards the request to your app's Kestrel server on an internal port.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div><div class="flow-text"><div><strong>Kestrel → your ASP.NET Core app</strong></div><div class="flow-note" style="color:var(--teal-600);">Kestrel builds the HttpContext and runs the middleware pipeline.</div></div></div>
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 Interview answer — "Why a reverse proxy if Kestrel can self-host?"</div>
+        Kestrel <em>can</em> face the internet directly (and does inside many containers), but a reverse proxy adds a hardened layer for TLS termination, load balancing across multiple app instances, request buffering, and protection against slow/malicious clients. So: Kestrel is the app server; Nginx/IIS is the edge.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH4 -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>The Request Lifecycle</h2><div class="ch-sub">The full journey — the answer to the #1 interview question</div></div></div>
+    <div class="section">
+      <p>This is the diagram to be able to draw from memory. Follow a single call — <code class="inline">GET /api/tasks/5</code> — all the way down and back up.</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);"><div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div><div class="flow-text"><div><strong>Client</strong> sends the HTTP request</div><div class="flow-note" style="color:var(--purple-600);">Browser / mobile / Postman over HTTP(S).</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);"><div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">2</div><div class="flow-text"><div><strong>Kestrel</strong> receives it &amp; builds an <code class="inline">HttpContext</code></div><div class="flow-note" style="color:var(--blue-600);">Parses raw bytes into Request/Response objects.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div><div class="flow-text"><div><strong>Middleware pipeline</strong> runs in order</div><div class="flow-note" style="color:var(--teal-600);">Exception handling → HTTPS → routing → authentication → authorization.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);"><div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">4</div><div class="flow-text"><div><strong>Routing</strong> matches the endpoint; <strong>model binding</strong> runs</div><div class="flow-note" style="color:var(--amber-600);">URL → controller action; request data → C# parameters.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--coral-50); border-color:var(--coral-400);"><div class="flow-num" style="background:var(--coral-100);color:var(--coral-800);">5</div><div class="flow-text"><div><strong>Controller</strong> → <strong>Service</strong> → <strong>Repository</strong> → <strong>Database</strong></div><div class="flow-note" style="color:var(--coral-600);">Controller is thin; service holds business logic; repository/EF Core hits SQL Server.</div></div></div>
+        <div class="flow-arrow-down">↑</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">6</div><div class="flow-text"><div><strong>Response</strong> flows back up through the middleware, then out via Kestrel</div><div class="flow-note" style="color:var(--green-600);">Each middleware can post-process; Kestrel writes the bytes back to the client.</div></div></div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Say it in one breath</div>
+        "The request hits Kestrel, which builds an HttpContext and passes it through the middleware pipeline. Routing selects the endpoint, model binding maps the data, the controller delegates to a service, the service uses a repository / EF Core to reach the database, and the response travels back up through the middleware and out through Kestrel." Nail that and you've answered the question every .NET interviewer asks.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH5 -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>HttpContext &amp; the Host's Services</h2><div class="ch-sub">The per-request object and the infrastructure the host wires up</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — What is HttpContext?</div>
+      <p><code class="inline">HttpContext</code> is the object that represents <strong>everything about one HTTP request and its response</strong>. A fresh one is created by Kestrel for every request and discarded when it completes. It's how middleware and controllers read input and write output.</p>
+      <table class="comp-table">
+        <tr><th>Property</th><th>What it holds</th></tr>
+        <tr><td><code class="inline">Request</code></td><td>The incoming method, path, headers, query string, and body.</td></tr>
+        <tr><td><code class="inline">Response</code></td><td>The outgoing status code, headers, and body you write.</td></tr>
+        <tr><td><code class="inline">User</code></td><td>The authenticated user (a <code class="inline">ClaimsPrincipal</code>) — populated by authentication middleware.</td></tr>
+        <tr><td><code class="inline">Items</code></td><td>A per-request dictionary to pass data between middleware/components.</td></tr>
+        <tr><td><code class="inline">RequestServices</code></td><td>The per-request DI scope, used to resolve scoped services.</td></tr>
+        <tr><td><code class="inline">Connection</code></td><td>Low-level info like the client's IP address.</td></tr>
+      </table>
+      <div class="callout note">
+        <div class="callout-label">📝 Interview-ready definition</div>
+        "HttpContext represents all HTTP-specific information about a single request — its Request, Response, the authenticated User, per-request Items, and the DI scope (RequestServices). It's created per request and is the primary way middleware and controllers interact with the request and response."
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — What the host gives you for free</div>
+      <p>Because <code class="inline">CreateBuilder</code> sets these up, you never wire them by hand — you just use them:</p>
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">💉</div><div class="card-title">DI Container</div><div class="card-body">Constructor injection works everywhere — controllers, services, even middleware. (Module 5.)</div></div>
+        <div class="info-card"><div class="card-icon">⚙️</div><div class="card-title">Configuration</div><div class="card-body"><code class="inline">appsettings.json</code> + environment variables + more, layered by precedence. (Module 6.)</div></div>
+        <div class="info-card"><div class="card-icon">📋</div><div class="card-title">Logging</div><div class="card-body"><code class="inline">ILogger&lt;T&gt;</code> injectable anywhere, with multiple providers. (Module 7.)</div></div>
+        <div class="info-card"><div class="card-icon">🌐</div><div class="card-title">Kestrel</div><div class="card-body">Configured with sensible defaults; you rarely touch it early on.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH6 -->
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Walk me through what happens when a request hits your ASP.NET Core API.</div><div class="interview-a"><span class="a-label">A</span>Kestrel receives the request and builds an HttpContext. It flows through the middleware pipeline in order — exception handling, HTTPS redirection, routing, authentication, authorization. Routing matches the URL to an endpoint, model binding maps the request data to action parameters, and the controller runs. The controller delegates to a service for business logic, which uses a repository or EF Core to reach the database. The response then travels back up through the middleware and Kestrel writes it to the client.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>What does WebApplication.CreateBuilder do?</div><div class="interview-a"><span class="a-label">A</span>It bootstraps the host: it reads configuration from appsettings.json, environment variables, and command-line args; sets up the logging providers; creates the dependency-injection container; and configures Kestrel with defaults. It returns a builder you use to register services before calling Build().</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Why doesn't ASP.NET Core need IIS anymore?</div><div class="interview-a"><span class="a-label">A</span>Because it ships its own cross-platform web server, Kestrel, and your app owns its own lifetime via Program.cs. IIS is now optional — in production it or Nginx usually acts as a reverse proxy in front of Kestrel for TLS termination, load balancing, and security, but it no longer hosts the app the way it did in Framework.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>What is HttpContext and what's its lifetime?</div><div class="interview-a"><span class="a-label">A</span>It's the object representing a single HTTP request and response — Request, Response, User, Items, and RequestServices (the per-request DI scope). Kestrel creates a new one per request, and it's disposed when the request completes. It should never be shared across requests or captured in a singleton.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>Difference between the old Startup.cs model and the minimal hosting model?</div><div class="interview-a"><span class="a-label">A</span>Pre-.NET 6 split startup across Program.cs (build the host) and Startup.cs (ConfigureServices for DI, Configure for middleware). Since .NET 6 the minimal hosting model merges both into one top-level Program.cs: builder.Services for registration, then app.Use/Map for the pipeline. Functionally equivalent, just less boilerplate.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>What does app.Run() at the end of Program.cs do?</div><div class="interview-a"><span class="a-label">A</span>It starts Kestrel listening on its configured ports and blocks the main thread, keeping the application running until a shutdown signal (Ctrl+C or SIGTERM). Note it's different from app.Run(delegate), which registers terminal middleware.</div></div>
+  </div>
+
+  <!-- CH7 -->
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>The full request lifecycle, drawn from memory</span></li>
+          <li><span class="check">✓</span><span>What each of the 5 phases of Program.cs does</span></li>
+          <li><span class="check">✓</span><span>What Kestrel is and why a reverse proxy sits in front</span></li>
+          <li><span class="check">✓</span><span>HttpContext: its key properties and per-request lifetime</span></li>
+          <li><span class="check">✓</span><span>Minimal hosting vs the old Startup.cs model</span></li>
+          <li><span class="check">✓</span><span>That the host wires up DI, config, logging, Kestrel</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Kestrel transport internals (sockets, connection middleware)</span></li>
+          <li><span class="check">○</span><span>In-process vs out-of-process IIS hosting internals (know the terms only)</span></li>
+          <li><span class="check">○</span><span>Custom IHostedService / BackgroundService (later module)</span></li>
+          <li><span class="check">○</span><span>Hand-tuning Kestrel limits and endpoints</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Hosting shift:</strong> Framework = IIS owns lifetime. Core = your app is a console program that owns its own lifetime via a Host.</div>
+      <div class="rev-item"><strong>The Host wires up:</strong> DI container, Configuration, Logging, Kestrel. Created by <code>WebApplication.CreateBuilder(args)</code>.</div>
+      <div class="rev-item"><strong>Program.cs 5 phases:</strong> CreateBuilder → register Services → Build → middleware (Use/Map) → app.Run() starts Kestrel.</div>
+      <div class="rev-item"><strong>Kestrel:</strong> built-in, cross-platform C# web server. First thing every request hits. Often behind Nginx/IIS reverse proxy.</div>
+      <div class="rev-item"><strong>Reverse proxy adds:</strong> TLS termination, load balancing, security, static files. Kestrel = app server, proxy = edge.</div>
+      <div class="rev-item"><strong>Lifecycle:</strong> Client → Kestrel → HttpContext → Middleware → Routing → Controller → Service → Repository → DB → response back up.</div>
+      <div class="rev-item"><strong>HttpContext:</strong> per-request object — Request, Response, User, Items, RequestServices. Never share across requests.</div>
+      <div class="rev-item"><strong>Trap:</strong> <code>app.Run()</code> (no arg) starts the server; <code>app.Run(delegate)</code> is terminal middleware.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

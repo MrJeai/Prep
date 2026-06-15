@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 · M9 — Async/Await & Scalability</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · Module 9</div>
+    <h1>Async/Await &amp; Scalability</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — Why Async Exists</a>
+  <a class="nav-item" href="#ch2">02 — How Async Works</a>
+  <a class="nav-item" href="#ch3">03 — IO-bound vs CPU-bound</a>
+  <a class="nav-item" href="#ch4">04 — Async All The Way</a>
+  <a class="nav-item" href="#ch5">05 — Task, ValueTask &amp; Tokens</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 9 · Scalability</div>
+    <h1>Async/Await &amp; Scalability</h1>
+    <p>Interviewers love this topic because most developers use <code class="inline">async</code>/<code class="inline">await</code> without understanding what it actually does — and get the headline wrong. Async doesn't make code <em>faster</em>; it makes your server handle <em>more requests at once</em>. This module explains the threading model behind that claim, when async helps, and the mistakes that silently destroy it.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> C# &amp; Runtime</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- CH1 -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Why Async Exists</h2><div class="ch-sub">The cost of a blocked thread</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.1 — The synchronous problem</div>
+      <p>Your web server handles requests using a pool of threads. When a request comes in, a thread is assigned to it. Now imagine that request calls the database — a query that takes 200&nbsp;ms. In <strong>synchronous</strong> code, that thread <em>sits and waits</em>, doing nothing, blocked, until the database replies.</p>
+      <div class="callout danger">
+        <div class="callout-label">🚫 Thread pool exhaustion</div>
+        Threads are a limited resource. If every request blocks a thread while waiting on I/O, then under load all your threads end up parked, waiting. New requests have no thread to run on and start queuing — even though the CPU is almost idle. This is <strong>thread pool exhaustion</strong>, and it's why a synchronous API falls over under concurrency.
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.2 — The async insight</div>
+      <p>The key realisation: while waiting for the database, <strong>the thread has nothing to do</strong>. Async lets that thread be <em>released back to the pool</em> to serve other requests during the wait. When the database finally replies, a thread (any thread) picks the work back up and continues.</p>
+      <div class="callout definition">
+        <div class="callout-label">📖 The one-line truth interviewers want</div>
+        <strong>Async improves scalability (throughput), not the speed of a single operation.</strong> The database query still takes 200&nbsp;ms either way. What changes is that during those 200&nbsp;ms your server can serve many other requests instead of holding a thread hostage. More concurrent users on the same hardware — that's the win.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH2 -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>How Async Works</h2><div class="ch-sub">Threads, the thread pool, and non-blocking I/O</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.1 — Sync vs async, side by side</div>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--coral-50); border-color:var(--coral-400);"><div class="flow-num" style="background:var(--coral-100);color:var(--coral-800);">✗</div><div class="flow-text"><div><strong>Synchronous:</strong> Thread calls DB → <span style="color:var(--coral-800);">thread blocks &amp; waits 200ms</span> → thread resumes. One thread, stuck, the whole time.</div></div></div>
+        <div class="flow-arrow-down">vs</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">✓</div><div class="flow-text"><div><strong>Asynchronous:</strong> Thread starts DB call → <span style="color:var(--green-800);">thread returns to pool, serves other requests</span> → when DB replies, a thread resumes the method. No thread wasted on waiting.</div></div></div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.2 — await is a "pause and release" point</div>
+      <p>When the runtime hits <code class="inline">await</code> on an operation that isn't finished, it doesn't block. It <strong>returns the thread</strong> and registers a continuation — "when this completes, run the rest of the method." The I/O itself is handled by the operating system, which signals completion; no thread is babysitting it.</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre><span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">List</span>&lt;<span class="type">Task</span>&gt;&gt; <span class="meth">GetTasksAsync</span>()
+{
+    <span class="cmt">// await releases the thread while the DB does its work</span>
+    <span class="kw">var</span> tasks = <span class="kw">await</span> _db.Tasks.<span class="meth">ToListAsync</span>();
+    <span class="kw">return</span> tasks;   <span class="cmt">// a thread resumes here when data is ready</span>
+}</pre></div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Task</div>
+        A <code class="inline">Task</code> represents an operation that will complete in the future (a promise of a result). <code class="inline">Task&lt;T&gt;</code> promises a value of type <code class="inline">T</code>. <code class="inline">async</code> marks a method as containing await points; <code class="inline">await</code> unwraps the Task's result once ready, without blocking.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH3 -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>IO-bound vs CPU-bound</h2><div class="ch-sub">Knowing when async actually helps</div></div></div>
+    <div class="section">
+      <p>This distinction decides whether async is the right tool at all.</p>
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">IO-bound → use async</div><div class="method-card-body">Work that waits on something <em>external</em>: database, HTTP calls, file system, network.<ul><li>The thread would only be waiting.</li><li>async frees it → big scalability win.</li></ul></div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">CPU-bound → async won't help</div><div class="method-card-body">Work that keeps the CPU busy: heavy computation, image processing, large in-memory sorts.<ul><li>There's no "waiting" to free a thread from.</li><li>Use <code class="inline">Task.Run</code> to offload only if you must keep a UI/request responsive.</li></ul></div></div>
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 The rule of thumb</div>
+        Async shines when the bottleneck is <strong>waiting on I/O</strong> — which is almost everything a typical web API does (DB queries, calling other services). For pure CPU crunching, async doesn't create extra capacity, because nothing is idle to reclaim.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH4 -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Async All The Way</h2><div class="ch-sub">The golden rule — and the mistakes that break it</div></div></div>
+    <div class="section">
+      <div class="callout definition">
+        <div class="callout-label">📖 "Async all the way"</div>
+        Once a call is async, every caller up the chain should be async too — controller → service → repository all return <code class="inline">Task</code> and <code class="inline">await</code>. The moment you bridge async and sync by blocking, you reintroduce the very problem async was solving — and risk deadlocks.
+      </div>
+      <div class="section-title" style="margin-top:18px;"><div class="bar" style="background:var(--amber-200);"></div>4.1 — The four classic mistakes</div>
+      <div class="mistakes-grid">
+        <div class="mistake-item"><div class="mistake-icon">💀</div><div class="mistake-body"><div class="mistake-title">.Result and .Wait()</div><div class="mistake-desc"><code class="inline">var data = GetTasksAsync().Result;</code></div><div class="mistake-fix">→ Blocks the thread (sync-over-async) and can <strong>deadlock</strong>. Always <code class="inline">await</code> instead.</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">🌫️</div><div class="mistake-body"><div class="mistake-title">async void</div><div class="mistake-desc"><code class="inline">public async void DoWork()</code></div><div class="mistake-fix">→ Exceptions can't be caught and the caller can't await it. Use <code class="inline">async Task</code> (async void is only for event handlers).</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">🙈</div><div class="mistake-body"><div class="mistake-title">Not awaiting a Task</div><div class="mistake-desc">Calling an async method but ignoring the returned Task.</div><div class="mistake-fix">→ The work runs unobserved ("fire and forget"); exceptions vanish silently.</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">🔀</div><div class="mistake-body"><div class="mistake-title">Mixing sync &amp; async</div><div class="mistake-desc">Blocking on async deep in the stack while the top is async.</div><div class="mistake-fix">→ Stalls the thread pool under load. Keep it async end-to-end.</div></div></div>
+      </div>
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Why .Result can deadlock</div>
+        In contexts with a synchronization context (classic ASP.NET, UI apps), <code class="inline">.Result</code> blocks the current thread while the awaited continuation also needs that same thread to finish — each waits on the other, forever. ASP.NET Core has no such context so it's less prone, but blocking still starves the thread pool. The fix is universal: never block; <code class="inline">await</code> all the way.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH5 -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Task, ValueTask &amp; Cancellation</h2><div class="ch-sub">A few details that signal depth</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — Task vs ValueTask</div>
+      <p><code class="inline">Task</code> is a class (heap-allocated). For very hot paths that <em>often complete synchronously</em> (e.g. a cache hit), allocating a Task every time is wasteful. <code class="inline">ValueTask&lt;T&gt;</code> can avoid that allocation. Rule of thumb: default to <code class="inline">Task</code>; reach for <code class="inline">ValueTask</code> only when profiling shows allocation pressure on a frequently-synchronous path. Don't await a <code class="inline">ValueTask</code> more than once.</p>
+    </div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — CancellationToken</div>
+      <p>Pass a <code class="inline">CancellationToken</code> through async calls so work can be abandoned if the client disconnects or a timeout fires — saving database and CPU effort on results nobody will read. ASP.NET Core gives you one via <code class="inline">HttpContext.RequestAborted</code>, and action methods can accept one directly.</p>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span></div><pre><span class="anno">[HttpGet]</span>
+<span class="kw">public async</span> <span class="type">Task</span>&lt;<span class="type">IActionResult</span>&gt; <span class="meth">Get</span>(<span class="type">CancellationToken</span> ct)
+{
+    <span class="kw">var</span> data = <span class="kw">await</span> _service.<span class="meth">GetAllAsync</span>(ct);
+    <span class="kw">return</span> <span class="meth">Ok</span>(data);
+}</pre></div>
+      <div class="callout tip">
+        <div class="callout-label">💡 ConfigureAwait(false) — know the term</div>
+        In library code you'll see <code class="inline">await x.ConfigureAwait(false)</code>, which says "don't bother capturing the original context to resume on." It matters in apps with a sync context (UI/old ASP.NET). In ASP.NET Core it's largely unnecessary, but recognising it — and why libraries use it — is good interview signal.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH6 -->
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>Does async/await make my code faster?</div><div class="interview-a"><span class="a-label">A</span>No — it improves scalability, not the speed of a single operation. A 200ms database call still takes 200ms. What async changes is that the thread is freed during that wait to serve other requests, so the server handles far more concurrent requests on the same hardware. The win is throughput, not latency.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>What actually happens at an await?</div><div class="interview-a"><span class="a-label">A</span>If the awaited operation isn't complete, the runtime returns the thread to the pool and registers a continuation. The I/O is handled by the OS, so no thread is blocked waiting. When the operation completes, a thread from the pool resumes the method right after the await. That thread-freeing is the whole point.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>When should you NOT use async?</div><div class="interview-a"><span class="a-label">A</span>For pure CPU-bound work. Async helps when a thread would otherwise sit idle waiting on I/O — database, network, files. CPU-bound work keeps the CPU busy, so there's no idle thread to reclaim; wrapping it in async adds overhead without adding capacity. If you must keep a request responsive during heavy computation, offload with Task.Run, but that's a different concern from scalability.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>What's wrong with calling .Result or .Wait()?</div><div class="interview-a"><span class="a-label">A</span>It blocks the thread (sync-over-async), reintroducing thread starvation, and in contexts with a synchronization context it can deadlock — the blocked thread is the one the continuation needs to resume. The fix is to await all the way up instead of blocking.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>Why avoid async void?</div><div class="interview-a"><span class="a-label">A</span>An async void method can't be awaited, so the caller can't know when it finished or catch its exceptions — an unhandled exception in async void can crash the process. Use async Task instead; async void is only appropriate for event handlers.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>What is a CancellationToken used for?</div><div class="interview-a"><span class="a-label">A</span>It lets you cooperatively cancel async work — for example, if the client disconnects or a request times out, you stop the database query or HTTP call rather than wasting resources on a result nobody will read. ASP.NET Core surfaces one via HttpContext.RequestAborted, and action methods can accept one as a parameter.</div></div>
+  </div>
+
+  <!-- CH7 -->
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Async = scalability/throughput, not raw speed</span></li>
+          <li><span class="check">✓</span><span>Thread pool exhaustion and how async prevents it</span></li>
+          <li><span class="check">✓</span><span>What happens at an await (thread released)</span></li>
+          <li><span class="check">✓</span><span>IO-bound vs CPU-bound — when async applies</span></li>
+          <li><span class="check">✓</span><span>The four mistakes: .Result/.Wait(), async void, not awaiting, sync-over-async</span></li>
+          <li><span class="check">✓</span><span>CancellationToken basics; recognise Task vs ValueTask</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Writing custom awaitables / state machine internals</span></li>
+          <li><span class="check">○</span><span>Deep ValueTask pooling mechanics</span></li>
+          <li><span class="check">○</span><span>TPL Dataflow, channels (later, if needed)</span></li>
+          <li><span class="check">○</span><span>Custom TaskScheduler / synchronization contexts</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Headline:</strong> async improves <em>scalability/throughput</em>, NOT the speed of one call. The DB query still takes 200ms.</div>
+      <div class="rev-item"><strong>Sync problem:</strong> blocked thread waits idle on I/O → under load all threads parked → thread pool exhaustion → requests queue.</div>
+      <div class="rev-item"><strong>await:</strong> if not done, thread is released back to the pool; OS handles the I/O; a thread resumes the method on completion.</div>
+      <div class="rev-item"><strong>IO-bound → async</strong> (DB, HTTP, files). <strong>CPU-bound → async won't help</strong> (nothing idle to reclaim; use Task.Run only to stay responsive).</div>
+      <div class="rev-item"><strong>Async all the way:</strong> controller → service → repository all async. Never bridge to sync by blocking.</div>
+      <div class="rev-item"><strong>Mistakes:</strong> .Result/.Wait() (block + deadlock), async void (uncatchable), not awaiting (lost exceptions), mixing sync/async.</div>
+      <div class="rev-item"><strong>Task</strong> = future result (default). <strong>ValueTask</strong> = avoid allocation on often-synchronous hot paths; await once.</div>
+      <div class="rev-item"><strong>CancellationToken:</strong> abandon work when client disconnects/timeouts. From <code>HttpContext.RequestAborted</code> or action param.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

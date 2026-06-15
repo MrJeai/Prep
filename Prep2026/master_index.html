@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>.NET Backend Interview Prep — Master Roadmap (30 Modules)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<style>
+.idx-stats{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 28px;}
+.stat-card{flex:1;min-width:150px;background:#fff;border:1px solid var(--gray-200);border-radius:14px;padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.stat-num{font-size:30px;font-weight:800;color:var(--purple-600);line-height:1;}
+.stat-lbl{font-size:12px;color:var(--gray-600);margin-top:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;}
+.progress-wrap{margin:0 0 30px;}
+.progress-track{height:14px;background:var(--gray-200);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--purple-400),var(--teal-400));border-radius:99px;}
+.progress-cap{font-size:12px;color:var(--gray-600);margin-top:8px;font-weight:600;}
+.mod-list{display:flex;flex-direction:column;gap:10px;}
+.mod-row{display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:12px;border:1px solid var(--gray-200);background:#fff;text-decoration:none;transition:all .15s ease;}
+.mod-row.done:hover{border-color:var(--purple-400);box-shadow:0 4px 14px rgba(124,58,237,.12);transform:translateY(-1px);}
+.mod-row.planned{background:var(--gray-50);border-style:dashed;opacity:.78;}
+.mod-num{font-size:18px;font-weight:800;color:var(--gray-400);min-width:34px;text-align:center;}
+.mod-row.done .mod-num{color:var(--purple-600);}
+.mod-info{flex:1;min-width:0;}
+.mod-title{font-size:15px;font-weight:700;color:var(--gray-900);}
+.mod-sub{font-size:12.5px;color:var(--gray-600);margin-top:2px;line-height:1.4;}
+.mod-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:96px;}
+.roi{font-size:10.5px;font-weight:700;color:#fff;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+.wk{font-size:11px;font-weight:700;color:var(--gray-500);background:var(--gray-100);padding:2px 8px;border-radius:6px;}
+.mod-go{font-size:13px;font-weight:700;color:var(--purple-600);white-space:nowrap;display:flex;align-items:center;gap:4px;min-width:64px;justify-content:flex-end;}
+.mod-go .arr{font-size:15px;}
+.planned-pill{color:var(--gray-400);font-weight:600;}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--gray-600);margin-top:4px;}
+.legend span{display:flex;align-items:center;gap:6px;}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;}
+@media(max-width:640px){.mod-sub{display:none;}.mod-meta{min-width:auto;}}
+</style>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Master Roadmap</div>
+    <h1>.NET Backend Interview Prep</h1>
+  </div>
+  <div class="nav-section-label">Phases</div>
+  <a class="nav-item active" href="#phase1">Phase 1 — Core .NET (W1–4)</a>
+  <a class="nav-item" href="#phase2">Phase 2 — Scale & Cloud (W5–8)</a>
+  <a class="nav-item" href="#phase3">Phase 3 — Interview Mode (W9–12)</a>
+</nav>
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">30 Modules · 3 Phases · 12 Weeks</div>
+    <h1>The .NET Backend Interview Roadmap</h1>
+    <p>Your complete, ordered syllabus for transitioning from legacy .NET Framework to modern .NET 8 and landing a strong backend role. Built for a 4 YOE engineer: every module is sequenced for maximum interview ROI, from HTTP fundamentals through system design and the final application push. Click any completed module to open its full book-style notes.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> All 30 modules built ✓</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> 4 YOE · India · Product roles</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> 3 hrs/day · 12-week plan</div>
+    </div>
+  </div>
+<div class="page-body">
+  <div class="idx-stats">
+    <div class="stat-card"><div class="stat-num">30</div><div class="stat-lbl">Total modules</div></div>
+    <div class="stat-card"><div class="stat-num">30</div><div class="stat-lbl">Notes built</div></div>
+    <div class="stat-card"><div class="stat-num">12 / 12</div><div class="stat-lbl">Weeks complete</div></div>
+    <div class="stat-card"><div class="stat-num">3</div><div class="stat-lbl">Phases</div></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill"></div></div>
+    <div class="progress-cap">Complete — all 30 modules built across all 3 phases. Every module below is a live link.</div>
+    <div class="legend">
+      <span><i style="background:#e0395f;"></i> Very High / Critical ROI</span>
+      <span><i style="background:#e8890c;"></i> High</span>
+      <span><i style="background:#2f7fd6;"></i> Medium-High</span>
+      <span><i style="background:#0f9b8e;"></i> Medium</span>
+      <span><i style="background:#8b6fc7;"></i> Low-Med</span>
+    </div>
+  </div>
+<div class="chapter ch-purple" id="phase1"><div class="chapter-header"><div class="chapter-num">P1</div><div><h2>Phase 1 — Modern .NET Core Mastery</h2><div class="ch-sub">Weeks 1–4 · the foundation every interview is built on</div></div></div><div class="mod-list"><a class="mod-row done" href="m1_http_rest.html"><div class="mod-num">01</div><div class="mod-info"><div class="mod-title">HTTP &amp; REST Fundamentals</div><div class="mod-sub">Protocol, methods, status codes, REST, API design</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="week1_dotnet_framework_vs_core_notes.html"><div class="mod-num">02</div><div class="mod-info"><div class="mod-title">.NET Framework vs .NET 8</div><div class="mod-sub">Platform evolution, architecture, migration</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m3_architecture_hosting.html"><div class="mod-num">03</div><div class="mod-info"><div class="mod-title">ASP.NET Core Architecture &amp; Hosting</div><div class="mod-sub">Kestrel, Program.cs, request lifecycle, HttpContext</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="week1_middleware_notes.html"><div class="mod-num">04</div><div class="mod-info"><div class="mod-title">Middleware Pipeline</div><div class="mod-sub">Use/Run/Map, ordering, short-circuiting, custom middleware</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m5_dependency_injection.html"><div class="mod-num">05</div><div class="mod-info"><div class="mod-title">Dependency Injection &amp; Service Lifetimes</div><div class="mod-sub">IoC, container, Transient/Scoped/Singleton, captive deps</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m6_configuration.html"><div class="mod-num">06</div><div class="mod-info"><div class="mod-title">Configuration &amp; Environments</div><div class="mod-sub">Providers, precedence, IOptions, secrets</div></div><div class="mod-meta"><span class="roi" style="background:#0f9b8e;">Medium ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m7_logging.html"><div class="mod-num">07</div><div class="mod-info"><div class="mod-title">Logging Fundamentals</div><div class="mod-sub">ILogger, levels, structured logging, Serilog</div></div><div class="mod-meta"><span class="roi" style="background:#0f9b8e;">Medium ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m8_controllers_routing_binding.html"><div class="mod-num">08</div><div class="mod-info"><div class="mod-title">Controllers, Routing, Binding &amp; API Design</div><div class="mod-sub">Routing, model binding, validation, ProblemDetails</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m9_async_scalability.html"><div class="mod-num">09</div><div class="mod-info"><div class="mod-title">Async/Await &amp; Scalability</div><div class="mod-sub">Thread pool, IO vs CPU bound, common mistakes</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W1</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m10_efcore.html"><div class="mod-num">10</div><div class="mod-info"><div class="mod-title">EF Core &amp; Database Mastery</div><div class="mod-sub">6 chapters: DbContext → tracking → relationships → migrations → N+1 → concurrency</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W2</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m11_sql_server.html"><div class="mod-num">11</div><div class="mod-info"><div class="mod-title">SQL Server for Interviews</div><div class="mod-sub">Joins, indexes, normalization, isolation, query patterns</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W2</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m12_auth.html"><div class="mod-num">12</div><div class="mod-info"><div class="mod-title">Authentication &amp; Authorization</div><div class="mod-sub">JWT, claims, roles vs policies, refresh tokens, OAuth/OIDC</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W3</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m13_clean_architecture.html"><div class="mod-num">13</div><div class="mod-info"><div class="mod-title">Clean Architecture</div><div class="mod-sub">Layers, Repository, CQRS, MediatR, AutoMapper, FluentValidation</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W3</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m14_solid.html"><div class="mod-num">14</div><div class="mod-info"><div class="mod-title">SOLID Principles</div><div class="mod-sub">All five with C# before/after examples</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W3</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m15_design_patterns.html"><div class="mod-num">15</div><div class="mod-info"><div class="mod-title">Design Patterns</div><div class="mod-sub">Singleton, Factory, Strategy, Repository, Builder, Observer</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W4</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m16_testing.html"><div class="mod-num">16</div><div class="mod-info"><div class="mod-title">Testing (xUnit)</div><div class="mod-sub">Unit vs integration, Moq, AAA, coverage</div></div><div class="mod-meta"><span class="roi" style="background:#2f7fd6;">Medium-High ROI</span><span class="wk">W4</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a></div></div><div class="chapter ch-teal" id="phase2"><div class="chapter-header"><div class="chapter-num">P2</div><div><h2>Phase 2 — Scalable Backend + Cloud</h2><div class="ch-sub">Weeks 5–8 · what separates mid from senior</div></div></div><div class="mod-list"><a class="mod-row done" href="m17_caching_redis.html"><div class="mod-num">17</div><div class="mod-info"><div class="mod-title">Caching &amp; Redis</div><div class="mod-sub">In-memory vs distributed, cache-aside, TTL, invalidation</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W5</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m18_performance.html"><div class="mod-num">18</div><div class="mod-info"><div class="mod-title">Performance: Rate Limiting, Compression, Versioning</div><div class="mod-sub">Response caching, compression, rate limiting</div></div><div class="mod-meta"><span class="roi" style="background:#2f7fd6;">Medium-High ROI</span><span class="wk">W5</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m19_microservices.html"><div class="mod-num">19</div><div class="mod-info"><div class="mod-title">Microservices Fundamentals</div><div class="mod-sub">Monolith vs micro, REST vs gRPC, event-driven, idempotency</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W6</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m20_rabbitmq.html"><div class="mod-num">20</div><div class="mod-info"><div class="mod-title">Messaging with RabbitMQ</div><div class="mod-sub">Queues vs pub/sub, retries, dead-letter queues</div></div><div class="mod-meta"><span class="roi" style="background:#2f7fd6;">Medium-High ROI</span><span class="wk">W6</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m21_docker.html"><div class="mod-num">21</div><div class="mod-info"><div class="mod-title">Docker &amp; Docker Compose</div><div class="mod-sub">Images, multi-stage builds, Compose</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W7</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m22_cicd.html"><div class="mod-num">22</div><div class="mod-info"><div class="mod-title">CI/CD with GitHub Actions</div><div class="mod-sub">Build → test → publish, deployment automation</div></div><div class="mod-meta"><span class="roi" style="background:#0f9b8e;">Medium ROI</span><span class="wk">W7</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m23_azure.html"><div class="mod-num">23</div><div class="mod-info"><div class="mod-title">Azure Fundamentals &amp; Deployment</div><div class="mod-sub">App Service, Azure SQL, Redis, Key Vault</div></div><div class="mod-meta"><span class="roi" style="background:#0f9b8e;">Medium ROI</span><span class="wk">W8</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m24_logging_monitoring.html"><div class="mod-num">24</div><div class="mod-info"><div class="mod-title">Logging &amp; Monitoring in Production</div><div class="mod-sub">Serilog config, health checks, observability</div></div><div class="mod-meta"><span class="roi" style="background:#0f9b8e;">Medium ROI</span><span class="wk">W8</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a></div></div><div class="chapter ch-coral" id="phase3"><div class="chapter-header"><div class="chapter-num">P3</div><div><h2>Phase 3 — Interview Mode</h2><div class="ch-sub">Weeks 9–12 · turning knowledge into offers</div></div></div><div class="mod-list"><a class="mod-row done" href="m25_dsa.html"><div class="mod-num">25</div><div class="mod-info"><div class="mod-title">DSA</div><div class="mod-sub">Pattern-based: arrays, strings, sliding window, trees, DP</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W9</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m26_system_design_fundamentals.html"><div class="mod-num">26</div><div class="mod-info"><div class="mod-title">System Design Fundamentals (6A)</div><div class="mod-sub">Scalability, load balancing, caching, DB scaling, CAP</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W10</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m27_hld.html"><div class="mod-num">27</div><div class="mod-info"><div class="mod-title">High-Level Design — HLD (6B)</div><div class="mod-sub">7-step framework + URL shortener, WhatsApp, rate limiter…</div></div><div class="mod-meta"><span class="roi" style="background:#e8890c;">High ROI</span><span class="wk">W10</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m28_lld.html"><div class="mod-num">28</div><div class="mod-info"><div class="mod-title">Low-Level Design — LLD (6C)</div><div class="mod-sub">OOP, SOLID applied, UML + parking lot, BookMyShow, ATM</div></div><div class="mod-meta"><span class="roi" style="background:#e0395f;">Very High ROI</span><span class="wk">W11</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m29_git.html"><div class="mod-num">29</div><div class="mod-info"><div class="mod-title">Git for Interviews</div><div class="mod-sub">merge vs rebase, cherry-pick, conflict resolution</div></div><div class="mod-meta"><span class="roi" style="background:#8b6fc7;">Low-Med ROI</span><span class="wk">W11</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a>
+<a class="mod-row done" href="m30_resume_interview.html"><div class="mod-num">30</div><div class="mod-info"><div class="mod-title">Resume + LinkedIn + Mock + Applications</div><div class="mod-sub">Impact bullets, ATS, mock rounds, application strategy</div></div><div class="mod-meta"><span class="roi" style="background:#c0274c;">Critical ROI</span><span class="wk">W12</span></div><div class="mod-go">Open<span class="arr">↗</span></div></a></div></div>
+  <div class="revision-box">
+    <h3>🧭 How to Use This Roadmap</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Go in order.</strong> Each module assumes the ones before it. The sequence is deliberately ROI-optimised, not topic-alphabetical.</div>
+      <div class="rev-item"><strong>One module ≈ one study block.</strong> Read the chapters, then cover the page and answer the interview questions out loud before moving on.</div>
+      <div class="rev-item"><strong>The Quick Revision box</strong> at the bottom of each module is your night-before-interview cheat sheet — copy it into your own notes.</div>
+      <div class="rev-item"><strong>Verify as you go.</strong> Cross-check the revision boxes against Microsoft Learn; the act of confirming is what locks the knowledge in.</div>
+      <div class="rev-item"><strong>Very High / Critical ROI first</strong> if time is short: M1, M3, M5, M10, M12, M14, M17, M25, M28, M30.</div>
+      <div class="rev-item"><strong>Phase 3 is non-negotiable.</strong> Strong fundamentals still need DSA, system design, and a sharp resume to convert into offers.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

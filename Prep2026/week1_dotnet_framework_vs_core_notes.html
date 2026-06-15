@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 — .NET Framework vs .NET Core</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR NAV -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · Modern .NET</div>
+    <h1>.NET Framework vs .NET Core</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — The Big Picture &amp; Timeline</a>
+  <a class="nav-item" href="#ch2">02 — Why .NET Core Was Born</a>
+  <a class="nav-item" href="#ch3">03 — Under the Hood (Architecture)</a>
+  <a class="nav-item" href="#ch4">04 — Head-to-Head Comparison</a>
+  <a class="nav-item" href="#ch5">05 — How a Modern App Runs</a>
+  <a class="nav-item" href="#ch6">06 — Migrating Legacy → Modern</a>
+  <a class="nav-item" href="#ch7">07 — Interview Prep</a>
+  <a class="nav-item" href="#ch8">08 — What to Know at 4 YOE</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 0 · Foundation</div>
+    <h1>.NET Framework vs .NET Core</h1>
+    <p>The single most important "before you write any code" topic of Week 1. This module explains — from first principles and in plain language — what the two platforms are, why Microsoft rebuilt .NET from scratch, how they differ under the hood, and how to migrate a legacy app like yours. By the end you should be able to explain the whole story confidently in an interview, without notes.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> .NET 8 (LTS)</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- ════════════════ CHAPTER 1 ════════════════ -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-num">01</div>
+      <div>
+        <h2>The Big Picture &amp; Timeline</h2>
+        <div class="ch-sub">What .NET is, the two platforms, and why the naming is confusing</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.1 — First, what does the word ".NET" actually mean?
+      </div>
+      <p>Before comparing "Framework" and "Core", you have to be clear about what ".NET" itself is, because the word gets used loosely. <strong>.NET is a development platform</strong> — not a single program, but a bundle of three things that always travel together:</p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">⚙️</div>
+          <div class="card-title">A Runtime</div>
+          <div class="card-body">The engine that actually executes your compiled code, manages memory (garbage collection), and handles threading. This is the <strong>CLR</strong> in Framework and the <strong>CoreCLR</strong> in Core.</div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">📚</div>
+          <div class="card-title">A Library Set</div>
+          <div class="card-body">Thousands of pre-built classes you call every day — <code class="inline">List&lt;T&gt;</code>, <code class="inline">String</code>, <code class="inline">File</code>, <code class="inline">HttpClient</code>. Collectively the <strong>Base Class Library (BCL)</strong>.</div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🛠️</div>
+          <div class="card-title">Languages + Compiler</div>
+          <div class="card-body">C#, F#, and VB.NET, plus the compiler (Roslyn) and tooling that turn your source code into something the runtime can run.</div>
+        </div>
+      </div>
+
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition</div>
+        <strong>.NET Framework</strong> and <strong>.NET Core</strong> are two different <em>implementations</em> of this same idea — two separate engines and library sets that both run C#. They are siblings, not versions of each other. You cannot "upgrade" Framework to Core by changing a number; they are built on different foundations, which is the whole reason this comparison matters.
+      </div>
+
+      <p>A useful one-line mental model to carry through the rest of these notes: <strong>both platforms run C#, but Framework is the old Windows-only engine from 2002, and Core is the modern, cross-platform, rebuilt-from-scratch engine that replaced it.</strong></p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.2 — What is .NET Framework? (the original, 2002)
+      </div>
+      <p>.NET Framework was Microsoft's original .NET platform, first released in <strong>2002</strong>. For nearly 15 years it <em>was</em> ".NET" — there was no other option. It was designed in an era when "a server" almost always meant "a Windows server running IIS", so the entire platform was built tightly around Windows.</p>
+      <p>Three properties define it, and each one later became a limitation:</p>
+      <ul class="checklist knows" style="margin-top:6px;">
+        <li><span class="check" style="color:var(--purple-400);">▸</span><span><strong>Windows-only.</strong> It uses Windows-specific APIs deep inside, so it physically cannot run on Linux or macOS.</span></li>
+        <li><span class="check" style="color:var(--purple-400);">▸</span><span><strong>Machine-wide and pre-installed.</strong> It ships <em>as part of Windows itself</em>. One copy is installed for the whole machine, and every app shares it.</span></li>
+        <li><span class="check" style="color:var(--purple-400);">▸</span><span><strong>Monolithic.</strong> It is one giant, indivisible package. You reference "the Framework" and get everything, whether you use it or not.</span></li>
+      </ul>
+      <p>Its final version is <strong>4.8 / 4.8.1</strong>. Microsoft has stated it is "done" — it is still <em>supported</em> (it ships with Windows and gets security fixes), but it will receive <strong>no new features ever again</strong>. This is the platform your current legacy stack runs on.</p>
+
+      <div class="callout note">
+        <div class="callout-label">📝 Note for your situation</div>
+        Your current work (.NET Framework, SSRS, XML-based frameworks, workflow systems) lives entirely in this world. Nothing about it is "wrong" — these apps run fine and will keep being supported. But because Framework is frozen, the market has moved to Core, and that gap is exactly what these 12 weeks are designed to close.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.3 — What is .NET Core? (the rebuild, 2016)
+      </div>
+      <p>Around 2014–2016, Microsoft made a bold decision: rather than keep patching the aging Framework, they would <strong>rewrite the platform from scratch</strong> with a modern design and ship the first result as <strong>.NET Core 1.0 in June 2016</strong>. The goals were explicit and they shaped everything:</p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">🌍</div>
+          <div class="card-title">Cross-platform</div>
+          <div class="card-body">Run the same app on Windows, Linux, and macOS — essential for Docker, the cloud, and cheaper Linux hosting.</div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🔓</div>
+          <div class="card-title">Open source</div>
+          <div class="card-body">Developed in the open on GitHub, with the community able to read, contribute, and file issues — the opposite of the closed Framework.</div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">🧩</div>
+          <div class="card-title">Modular</div>
+          <div class="card-body">Ship only the pieces an app needs as small NuGet packages, instead of one giant install. Smaller, faster, deployable per-app.</div>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">⚡</div>
+          <div class="card-title">High-performance</div>
+          <div class="card-body">A new JIT, a rewritten web stack (Kestrel + ASP.NET Core), and a relentless focus on speed and memory — now among the fastest mainstream runtimes.</div>
+        </div>
+      </div>
+
+      <p>Because it was a clean rewrite, the team was free to fix old mistakes: they baked <strong>dependency injection</strong> into the core, replaced the clumsy <code class="inline">web.config</code> XML system with a flexible <strong>configuration model</strong>, built a fast cross-platform web server (<strong>Kestrel</strong>), and unified MVC, Web API, and Razor Pages into one framework (<strong>ASP.NET Core</strong>). These are the things your roadmap spends Week 1–4 on, and they exist <em>because</em> Core was a rewrite, not a patch.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        1.4 — The naming mess, explained once and for all
+      </div>
+      <p>This trips up almost everyone, so it is worth getting straight. The name changed twice, which is why you'll hear ".NET Core", ".NET 5", ".NET 8" and wonder if they are different things. <strong>They are the same lineage.</strong> Here is the actual timeline:</p>
+
+      <!-- TIMELINE -->
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--gray-50); border-color:var(--gray-400);">
+          <div class="flow-num" style="background:var(--gray-200);color:var(--gray-900);">02</div>
+          <div class="flow-text">
+            <div><strong>2002 — .NET Framework 1.0</strong> &nbsp;<span class="badge badge-red">Legacy line</span></div>
+            <div class="flow-note" style="color:var(--gray-600);">The original. Evolves up to 4.8.1, then frozen. Windows-only.</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);">
+          <div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">16</div>
+          <div class="flow-text">
+            <div><strong>2016 — .NET Core 1.0</strong> → 2.0 → 2.1 → 3.0 → <strong>3.1 (LTS)</strong> &nbsp;<span class="badge badge-teal">Modern line begins</span></div>
+            <div class="flow-note" style="color:var(--teal-600);">The cross-platform rewrite. Called "Core" through version 3.1.</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);">
+          <div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">20</div>
+          <div class="flow-text">
+            <div><strong>2020 — .NET 5</strong> &nbsp;<span class="badge badge-amber">The unification + rename</span></div>
+            <div class="flow-note" style="color:var(--amber-600);">Microsoft drops the word "Core" and skips "4" (to avoid confusion with Framework 4.x). One unified ".NET" going forward — but it IS Core under the hood.</div>
+          </div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);">
+          <div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">→</div>
+          <div class="flow-text">
+            <div><strong>.NET 6 (LTS) → 7 → .NET 8 (LTS) → 9 → 10 (LTS)…</strong> &nbsp;<span class="badge badge-purple">Annual cadence, every November</span></div>
+            <div class="flow-note" style="color:var(--purple-600);"><strong>.NET 8</strong> is the LTS version your roadmap targets. Even numbers = Long-Term Support (~3 yrs); odd numbers = Standard-Term Support (~18 months).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-label">💡 The one sentence to remember</div>
+        ".NET Core", ".NET 5", ".NET 6", ".NET 8" are <strong>all the same modern platform</strong> — Microsoft just dropped the word "Core" after version 3.1 and skipped "4". So in 2025+, when someone says "I work in .NET 8", they mean modern Core. ".NET Framework 4.x" is the separate, frozen, old platform. <strong>Modern ≠ a higher Framework number; it's a different lineage entirely.</strong>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Common confusion to avoid</div>
+        .NET Framework <strong>4.8</strong> sounds "newer" than .NET Core <strong>3.1</strong> because 4.8 &gt; 3.1. It is not. They are different products on different version tracks. .NET <strong>5</strong> deliberately jumped past 4 precisely so nobody would think ".NET 5" was an upgrade of "Framework 4.x".
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 2 ════════════════ -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header">
+      <div class="chapter-num">02</div>
+      <div>
+        <h2>Why .NET Core Was Born</h2>
+        <div class="ch-sub">The real pain points of .NET Framework that forced a rewrite</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>Interviewers love this question because it separates people who "use .NET" from people who <em>understand</em> it. If you can explain <em>why</em> Core had to exist, you've shown you understand the engineering trade-offs, not just the syntax. Each pain point below follows the same shape: <strong>the limitation → the consequence it caused → how Core fixed it.</strong></p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.1 — Pain #1: Windows-only
+      </div>
+      <p><strong>The limitation:</strong> .NET Framework was built on Windows-specific APIs (the Win32 layer, the Windows registry, IIS). Those dependencies are woven so deeply into the runtime that the platform simply cannot run anywhere else.</p>
+      <p><strong>The consequence:</strong> By the 2010s the world had moved to the cloud, and cloud servers overwhelmingly run <strong>Linux</strong> — it's free, lightweight, and the default for Docker containers. A Windows-only platform meant you were locked into more expensive Windows hosting and couldn't put your app in a small Linux container. For a company running thousands of servers, that's a massive, recurring cost.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Core was written to be <strong>cross-platform from day one</strong>. The same compiled app runs on Windows, Linux, and macOS. This is what makes Docker, Kubernetes, and cheap Linux cloud hosting possible — and it's why "cross-platform" is the headline feature in every Core-vs-Framework answer.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.2 — Pain #2: Welded to IIS and System.Web
+      </div>
+      <p><strong>The limitation:</strong> In old ASP.NET, your web app couldn't run by itself. It needed <strong>IIS</strong> (Internet Information Services — Microsoft's Windows-only web server) to host it, and the entire request-handling stack lived in a heavy assembly called <code class="inline">System.Web</code> that was bolted to IIS.</p>
+      <p><strong>The consequence:</strong> You couldn't run the app outside Windows, couldn't easily self-host it, couldn't unit-test the hosting layer, and you inherited all of <code class="inline">System.Web</code>'s weight whether you needed it or not. The web pipeline was also rigid — reordering how requests were processed meant fighting <code class="inline">HttpModules</code> configured in XML.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Core ships its own fast, cross-platform, in-process web server called <strong>Kestrel</strong>. A Core web app is just a normal program with a <code class="inline">Main</code> method that starts a server — it can run standalone, behind nginx, behind IIS as a reverse proxy, or inside a container. <code class="inline">System.Web</code> is gone, replaced by the lean, code-driven <strong>middleware pipeline</strong> (your previous module).
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.3 — Pain #3: One machine-wide copy ("DLL hell")
+      </div>
+      <p><strong>The limitation:</strong> The Framework is installed <strong>once for the entire machine</strong>, and every application on that server shares the exact same copy. Shared assemblies live in a special system-wide store called the <strong>GAC (Global Assembly Cache)</strong>.</p>
+      <p><strong>The consequence:</strong> If App A needs Framework 4.6 behaviour and App B needs 4.8 behaviour, they fight — because there is only one copy and one GAC for both. Patching the Framework to fix App B could silently break App A. This whole class of problem earned the nickname <strong>"DLL hell"</strong>: you cannot run different versions <em>side by side</em> on the same machine.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Core is <strong>installed per-application</strong> (or even bundled <em>inside</em> the app). App A can ship with .NET 6 and App B with .NET 8 on the same server, fully isolated. There is no GAC. This <strong>side-by-side versioning</strong> means upgrading one app never endangers another — a huge operational win.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.4 — Pain #4: Updates installed "in place" and broke things
+      </div>
+      <p><strong>The limitation:</strong> Because the Framework was system-wide, Microsoft updates replaced it <em>in place</em>. Your app didn't choose its runtime version — the machine's current Framework decided it, and that could change underneath you via Windows Update.</p>
+      <p><strong>The consequence:</strong> A perfectly working production app could behave differently after a routine OS patch, because the shared runtime changed beneath it. Teams were terrified of updates, so machines drifted into inconsistent, hard-to-reproduce states.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Each Core app pins the exact runtime version it was built and tested against. The runtime travels with the app (or is explicitly chosen), so <strong>"works on my machine" actually means "works everywhere"</strong> — the same bits run identically in dev, CI, and production. This predictability is the foundation of modern CI/CD and containers.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.5 — Pain #5: Slow, Windows-tied release cadence
+      </div>
+      <p><strong>The limitation:</strong> Framework releases were chained to Windows release cycles, so meaningful new versions arrived years apart.</p>
+      <p><strong>The consequence:</strong> .NET fell behind faster-moving ecosystems. New language features, performance work, and APIs were bottlenecked behind the OS schedule.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Core decoupled from Windows entirely and now ships <strong>a major version every November</strong>, like clockwork. Even-numbered releases are <strong>LTS</strong> (longer support); odd ones are shorter-lived feature releases. Predictable, frequent, fast.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--teal-400);"></div>
+        2.6 — Pain #6: Monolithic and heavy
+      </div>
+      <p><strong>The limitation:</strong> Reference "the Framework" and you got <em>all</em> of it — every API, used or not — as one indivisible block of hundreds of megabytes.</p>
+      <p><strong>The consequence:</strong> Large deployments, slow startup, and no way to trim what you didn't use. Terrible for containers, where image size directly affects cost and deploy speed.</p>
+      <div class="callout tip">
+        <div class="callout-label">💡 How Core fixed it</div>
+        Core's library is <strong>modular NuGet packages</strong>: you pull in only what you use. Combined with <strong>trimming</strong> (removing unused code) and <strong>self-contained / single-file / Native AOT</strong> publishing, you can ship tiny, fast-starting apps — ideal for microservices and serverless.
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <div class="callout-label">🎯 Interview gold — say it like this</div>
+      "Framework was a Windows-only, machine-wide, monolithic platform welded to IIS, with a slow release cadence and no side-by-side versioning. Those constraints made it unfit for cloud, containers, and Linux. Rather than keep patching it, Microsoft rewrote .NET as a cross-platform, open-source, modular, app-local, high-performance runtime — that rewrite is .NET Core, now just called .NET." That single paragraph answers half the .NET-fundamentals questions you'll get.
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 3 ════════════════ -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header">
+      <div class="chapter-num">03</div>
+      <div>
+        <h2>Under the Hood — Architecture</h2>
+        <div class="ch-sub">The runtime, the JIT, the libraries, and how the engine is delivered</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>To answer the deeper interview questions ("how does it actually run differently?") you need to see inside both platforms. Both follow the same basic flow — <strong>your C# is compiled to an intermediate language, then a runtime turns it into native machine code and executes it</strong> — but each layer is implemented differently. Let's walk the stack from top to bottom.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        3.1 — The shared idea: source → IL → native
+      </div>
+      <p>This part is the <em>same</em> on both platforms, and it's worth stating because it grounds everything else:</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);">
+          <div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div>
+          <div class="flow-text"><div><strong>You write C#</strong></div><div class="flow-note" style="color:var(--purple-600);">Human-readable source code.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);">
+          <div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">2</div>
+          <div class="flow-text"><div><strong>Compiler (Roslyn) → IL</strong></div><div class="flow-note" style="color:var(--blue-600);">Compiles to <strong>Intermediate Language (IL/MSIL)</strong> — a CPU-neutral bytecode stored in a <code class="inline">.dll</code> or <code class="inline">.exe</code> assembly. IL is not yet machine code.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);">
+          <div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div>
+          <div class="flow-text"><div><strong>Runtime + JIT → native machine code</strong></div><div class="flow-note" style="color:var(--teal-600);">At runtime, the <strong>JIT (Just-In-Time) compiler</strong> converts IL into native CPU instructions, on demand, the first time each method runs.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);">
+          <div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">4</div>
+          <div class="flow-text"><div><strong>Runtime executes &amp; manages it</strong></div><div class="flow-note" style="color:var(--amber-600);">The runtime runs the native code while handling <strong>garbage collection</strong>, type safety, and exceptions.</div></div>
+        </div>
+      </div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Managed code</div>
+        Because the runtime manages memory and safety for you, .NET code is called <strong>managed code</strong>. The runtime that does the managing is generically called the <strong>CLR (Common Language Runtime)</strong>. Both platforms have a CLR — they're just different implementations of it.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        3.2 — Where they diverge: the runtime &amp; JIT
+      </div>
+      <p>The engine itself is a different codebase on each platform:</p>
+      <table class="comp-table">
+        <tr><th>Layer</th><th>.NET Framework</th><th>.NET Core / .NET 5+</th></tr>
+        <tr><td><strong>Runtime (CLR)</strong></td><td>The original <strong>CLR</strong>, Windows-only, shipped with the OS.</td><td><strong>CoreCLR</strong> — a re-engineered, cross-platform, open-source runtime.</td></tr>
+        <tr><td><strong>JIT compiler</strong></td><td>The older JIT.</td><td><strong>RyuJIT</strong> — a faster, modern JIT producing better-optimised native code. Also supports <strong>Native AOT</strong> (compile fully ahead-of-time, no JIT at runtime).</td></tr>
+        <tr><td><strong>Garbage Collector</strong></td><td>Mature GC, but tuned for Windows desktop/server.</td><td>Same GC heritage, heavily tuned for server &amp; container workloads (e.g. respects container memory limits).</td></tr>
+      </table>
+      <div class="callout note">
+        <div class="callout-label">📝 Why this matters for performance answers</div>
+        When people say "Core is much faster than Framework", a big part of the reason lives <em>here</em>: a better JIT (RyuJIT), a container-aware GC, and a rewritten web stack (Kestrel + ASP.NET Core). It's not magic — it's a newer engine.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        3.3 — The libraries: BCL vs the unified BCL
+      </div>
+      <p>Both platforms give you a <strong>Base Class Library (BCL)</strong> — the built-in types you use constantly. But they are separate implementations:</p>
+      <ul class="checklist knows" style="margin-top:6px;">
+        <li><span class="check" style="color:var(--coral-400);">▸</span><span><strong>Framework BCL:</strong> huge, mature, but Windows-bound and frozen. Includes Windows-only pieces (WinForms, WPF, parts of <code class="inline">System.Web</code>) baked in.</span></li>
+        <li><span class="check" style="color:var(--coral-400);">▸</span><span><strong>Core BCL (originally "CoreFX"):</strong> rebuilt to be cross-platform and shipped as modular NuGet packages. Windows-only UI tech is optional and only available when you target Windows.</span></li>
+      </ul>
+      <p>Most everyday APIs — collections, LINQ, <code class="inline">async</code>/<code class="inline">await</code>, strings, streams — exist in both and behave the same. The differences show up at the edges: Windows-specific APIs, the old config/web stack, and a handful of legacy technologies (covered in Chapter 6).</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--coral-400);"></div>
+        3.4 — How the engine reaches the machine (the biggest practical difference)
+      </div>
+      <p>This is the difference you can <em>feel</em> as a developer, and a frequent interview probe:</p>
+      <div class="method-cards" style="grid-template-columns: 1fr 1fr;">
+        <div class="method-card" style="border-color:var(--red-200);">
+          <div class="method-card-head" style="background:var(--red-50); color:var(--red-800);">.NET Framework — Machine-wide</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Installed once, system-wide, as part of Windows.</li>
+              <li>Shared assemblies live in the <strong>GAC</strong>.</li>
+              <li>Every app on the box uses the <em>same</em> copy.</li>
+              <li>No side-by-side versions → "DLL hell".</li>
+              <li>Updated in place by Windows Update.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="method-card" style="border-color:var(--teal-200);">
+          <div class="method-card-head" style="background:var(--teal-50); color:var(--teal-800);">.NET Core — App-local</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Installed per-app, or bundled <em>inside</em> the app.</li>
+              <li>No GAC. Dependencies are NuGet packages next to your app.</li>
+              <li>Each app pins its own runtime version.</li>
+              <li>Full <strong>side-by-side</strong> versioning on one machine.</li>
+              <li>You control exactly which runtime ships.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 The mental image</div>
+        Framework is like a <strong>shared building utility</strong> (one water supply for every flat — change it and everyone is affected). Core is like <strong>each flat having its own self-contained tank</strong> — total isolation, no one else affected when you change yours.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 4 ════════════════ -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header">
+      <div class="chapter-num">04</div>
+      <div>
+        <h2>Head-to-Head Comparison</h2>
+        <div class="ch-sub">The full feature-by-feature table, then the rows that matter most</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--amber-200);"></div>
+        4.1 — The master comparison table
+      </div>
+      <p>This is the table to internalise. If you can reproduce most of it from memory and explain <em>why</em> each row is the way it is, you've mastered the topic.</p>
+      <table class="comp-table">
+        <tr><th>Dimension</th><th>.NET Framework (legacy)</th><th>.NET Core / .NET 5+ (modern)</th></tr>
+        <tr><td><strong>Platform</strong></td><td>Windows only</td><td>Windows, Linux, macOS</td></tr>
+        <tr><td><strong>Open source</strong></td><td>No (closed, Microsoft-only)</td><td>Yes — developed in the open on GitHub</td></tr>
+        <tr><td><strong>Installation</strong></td><td>Machine-wide, ships with Windows, GAC</td><td>Per-app or self-contained, no GAC</td></tr>
+        <tr><td><strong>Side-by-side versions</strong></td><td>No (one shared copy)</td><td>Yes (full isolation per app)</td></tr>
+        <tr><td><strong>Web server</strong></td><td>IIS only (Windows)</td><td>Kestrel (cross-platform); optional IIS/nginx reverse proxy</td></tr>
+        <tr><td><strong>Web stack</strong></td><td>System.Web, separate MVC &amp; Web API &amp; Web Forms</td><td>ASP.NET Core — MVC, Web API, Razor Pages unified; middleware pipeline</td></tr>
+        <tr><td><strong>Dependency Injection</strong></td><td>Not built-in (needed 3rd-party libs)</td><td>Built into the framework as a first-class citizen</td></tr>
+        <tr><td><strong>Configuration</strong></td><td><code class="inline">web.config</code> / <code class="inline">app.config</code> (rigid XML)</td><td>Flexible providers: <code class="inline">appsettings.json</code>, env vars, secrets, etc.</td></tr>
+        <tr><td><strong>Performance</strong></td><td>Good, but older engine</td><td>Significantly faster (RyuJIT, container-aware GC, Kestrel)</td></tr>
+        <tr><td><strong>Deployment</strong></td><td>Needs Framework pre-installed on target</td><td>Framework-dependent OR fully self-contained / single-file / AOT</td></tr>
+        <tr><td><strong>Containers / Docker</strong></td><td>Poor fit (large, Windows-only images)</td><td>First-class — small Linux images, designed for containers</td></tr>
+        <tr><td><strong>Release cadence</strong></td><td>Slow, tied to Windows</td><td>Annual, every November (even = LTS)</td></tr>
+        <tr><td><strong>Project file</strong></td><td>Verbose, lists every file</td><td>Lean SDK-style <code class="inline">.csproj</code></td></tr>
+        <tr><td><strong>Future</strong></td><td>Frozen at 4.8.x — supported, no new features</td><td>Where all new .NET investment goes</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--amber-200);"></div>
+        4.2 — The three rows interviewers dig into
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">① Performance — don't just say "faster"</div>
+        Back it up: Core is faster because of the <strong>RyuJIT</strong> compiler, a <strong>garbage collector tuned for server/container</strong> workloads, the lightweight <strong>Kestrel</strong> web server, and a web stack rewritten to minimise allocations. ASP.NET Core consistently ranks among the fastest mainstream web frameworks in public benchmarks. "Faster because newer engine + leaner web stack" is the answer.
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">② Deployment — the model genuinely changed</div>
+        Framework apps assume the runtime is <em>already on the server</em>. Core apps can be <strong>framework-dependent</strong> (small; needs runtime installed) <em>or</em> <strong>self-contained</strong> (bundles the runtime inside the app, so the target machine needs nothing pre-installed) — plus <strong>single-file</strong> and <strong>Native AOT</strong> options. This flexibility is what makes Core ideal for Docker and serverless. (Details in Chapter 5.)
+      </div>
+
+      <div class="callout note">
+        <div class="callout-label">③ Dependency Injection &amp; Configuration — built in vs bolted on</div>
+        In Framework you reached for third-party DI containers and wrestled with <code class="inline">web.config</code> XML. Core bakes <strong>DI</strong> and a <strong>layered configuration system</strong> into the framework itself — they're not optional add-ons, they're how the framework is designed to be used. This is why your roadmap treats DI and configuration as core Week-1 skills.
+      </div>
+    </div>
+
+    <div class="callout warning">
+      <div class="callout-label">⚠️ Nuance that scores points</div>
+      Don't say "Core is just better, use it for everything." The mature answer: <strong>for any new project, choose modern .NET</strong> — it's faster, cross-platform, and where the future is. <strong>But</strong> some legacy tech only exists on Framework (WebForms, server-side WCF, Windows Workflow Foundation), so an existing Framework app that depends on those may stay there until those parts are re-architected. Knowing <em>when not</em> to migrate shows real engineering judgement.
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 5 ════════════════ -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header">
+      <div class="chapter-num">05</div>
+      <div>
+        <h2>How a Modern .NET App Runs</h2>
+        <div class="ch-sub">The project file, deployment models, TFMs, and .NET Standard</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        5.1 — The project file got radically simpler
+      </div>
+      <p>One of the first visible differences when you open a modern project is the <code class="inline">.csproj</code> file. The old Framework format listed <em>every single file</em> explicitly and was painful to edit by hand. The modern <strong>SDK-style</strong> format infers files automatically and is tiny:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">XML</span><span class="file-name">MyApp.csproj — modern SDK-style</span></div>
+        <pre><span class="anno">&lt;Project</span> <span class="type">Sdk</span>=<span class="str">"Microsoft.NET.Sdk.Web"</span><span class="anno">&gt;</span>
+  <span class="anno">&lt;PropertyGroup&gt;</span>
+    <span class="anno">&lt;TargetFramework&gt;</span>net8.0<span class="anno">&lt;/TargetFramework&gt;</span>
+    <span class="anno">&lt;Nullable&gt;</span>enable<span class="anno">&lt;/Nullable&gt;</span>
+    <span class="anno">&lt;ImplicitUsings&gt;</span>enable<span class="anno">&lt;/ImplicitUsings&gt;</span>
+  <span class="anno">&lt;/PropertyGroup&gt;</span>
+
+  <span class="cmt">&lt;!-- NuGet dependencies are simple one-liners --&gt;</span>
+  <span class="anno">&lt;ItemGroup&gt;</span>
+    <span class="anno">&lt;PackageReference</span> <span class="type">Include</span>=<span class="str">"Microsoft.EntityFrameworkCore.SqlServer"</span> <span class="type">Version</span>=<span class="str">"8.0.0"</span> <span class="anno">/&gt;</span>
+  <span class="anno">&lt;/ItemGroup&gt;</span>
+<span class="anno">&lt;/Project&gt;</span></pre>
+      </div>
+      <p>The <code class="inline">&lt;TargetFramework&gt;net8.0&lt;/TargetFramework&gt;</code> line is the single most important line in the file — it declares which platform and version you're building for. That value is called a <strong>Target Framework Moniker (TFM)</strong>.</p>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — TFM</div>
+        A <strong>TFM</strong> is a short code identifying the target platform: <code class="inline">net8.0</code> (modern .NET 8), <code class="inline">net48</code> (Framework 4.8), <code class="inline">netstandard2.0</code> (.NET Standard). Add a platform suffix like <code class="inline">net8.0-windows</code> when you need Windows-only APIs (e.g. WPF).
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        5.2 — Two ways to deploy (a Core-only superpower)
+      </div>
+      <p>Framework had essentially one deployment story: "make sure the right Framework is installed on the server first." Core gives you a choice, and interviewers like to hear you know both:</p>
+      <div class="method-cards" style="grid-template-columns: 1fr 1fr;">
+        <div class="method-card" style="border-color:var(--blue-200);">
+          <div class="method-card-head" style="background:var(--blue-50); color:var(--blue-800);">Framework-dependent</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Ships only <em>your</em> code.</li>
+              <li>Relies on the .NET runtime being already installed on the target.</li>
+              <li><strong>Pro:</strong> tiny output.</li>
+              <li><strong>Con:</strong> the correct runtime must exist on the machine.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="method-card" style="border-color:var(--teal-200);">
+          <div class="method-card-head" style="background:var(--teal-50); color:var(--teal-800);">Self-contained</div>
+          <div class="method-card-body">
+            <ul>
+              <li>Bundles the runtime <em>inside</em> your app.</li>
+              <li>Target machine needs <strong>nothing</strong> pre-installed.</li>
+              <li><strong>Pro:</strong> runs anywhere, version fully pinned.</li>
+              <li><strong>Con:</strong> larger output.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p>On top of these, modern .NET adds <strong>single-file</strong> publishing (one executable), <strong>trimming</strong> (strips unused code to shrink size), and <strong>Native AOT</strong> (compiles fully to native ahead of time — no JIT, near-instant startup, tiny footprint). These are exactly what make small, fast container images and serverless functions practical.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--blue-400);"></div>
+        5.3 — .NET Standard: the bridge between the two worlds
+      </div>
+      <p>During the years when Framework and Core coexisted, library authors had a problem: <em>how do I write one library that works on both?</em> The answer was <strong>.NET Standard</strong>.</p>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — .NET Standard</div>
+        <strong>.NET Standard</strong> is not a runtime you can run. It's a <em>formal specification of a set of APIs</em> that every .NET platform promises to implement. If you build a class library targeting <code class="inline">netstandard2.0</code>, it can be referenced by <em>both</em> a Framework app and a Core app — because both guarantee those APIs exist.
+      </div>
+      <p>Think of it as a <strong>contract</strong>, not an engine. It let teams share business-logic libraries across the old and new worlds during the transition.</p>
+      <div class="callout note">
+        <div class="callout-label">📝 Is it still relevant in 2025?</div>
+        Mostly historical now. Since .NET 5 unified everything, new code just targets <code class="inline">net8.0</code>. You still reach for <code class="inline">netstandard2.0</code> in one case: writing a <strong>shared library that must also be consumed by a legacy .NET Framework app</strong>. Otherwise, prefer <code class="inline">net8.0</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 6 ════════════════ -->
+  <div class="chapter ch-purple" id="ch6">
+    <div class="chapter-header">
+      <div class="chapter-num">06</div>
+      <div>
+        <h2>Migrating Legacy → Modern</h2>
+        <div class="ch-sub">The chapter most relevant to your own background</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p>You currently work on .NET Framework, so this chapter is doubly useful: it's a real interview topic <em>and</em> it reframes your existing experience as an asset. A candidate who can talk about "moving a real legacy system to modern .NET" sounds far more senior than one who only knows greenfield tutorials.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        6.1 — When to migrate, and when not to
+      </div>
+      <p><strong>Migrate when</strong> you want cross-platform/Linux hosting, smaller containers, better performance, modern libraries, or simply to stay on a supported, evolving platform. <strong>Think twice when</strong> the app is stable, rarely changed, and depends heavily on Framework-only technology — a rewrite may cost more than it returns. Good engineering is knowing the difference; say that out loud in interviews.</p>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        6.2 — What ports cleanly vs what does not
+      </div>
+      <p>Most pure business logic, data access, and class libraries port with little change. The pain is concentrated in a specific set of <strong>Framework-only technologies</strong> that have no direct modern equivalent:</p>
+      <table class="comp-table">
+        <tr><th>Legacy technology</th><th>Status on modern .NET</th><th>Modern replacement / approach</th></tr>
+        <tr><td><strong>Web Forms</strong></td><td>❌ Not supported</td><td>Rewrite UI in ASP.NET Core MVC, Razor Pages, or Blazor</td></tr>
+        <tr><td><strong>WCF (server-side)</strong></td><td>❌ Not supported as host</td><td>gRPC, ASP.NET Core Web API, or the community CoreWCF for clients</td></tr>
+        <tr><td><strong>Windows Workflow Foundation (WF)</strong></td><td>❌ Not in modern .NET</td><td>Re-implement with a modern workflow engine or message-driven design</td></tr>
+        <tr><td><strong>AppDomains</strong></td><td>❌ Removed</td><td>Use separate processes / <code class="inline">AssemblyLoadContext</code></td></tr>
+        <tr><td><strong>.NET Remoting</strong></td><td>❌ Removed</td><td>HTTP APIs, gRPC, message queues</td></tr>
+        <tr><td><strong>web.config behaviour</strong></td><td>⚠️ Replaced</td><td>The new configuration model (<code class="inline">appsettings.json</code> + providers)</td></tr>
+        <tr><td><strong>Business logic, EF, LINQ, most APIs</strong></td><td>✅ Ports fine</td><td>Recompile against <code class="inline">net8.0</code>; minor tweaks at most</td></tr>
+      </table>
+      <div class="callout warning">
+        <div class="callout-label">⚠️ Relevant to your stack</div>
+        Your background mentions <strong>workflow systems</strong> and <strong>XML-based frameworks</strong>. If those rely on Windows Workflow Foundation or Framework-only XML config, they're exactly the kind of thing that doesn't lift-and-shift — they need re-architecting. That's not a weakness to hide; it's a great story: "I worked on a legacy workflow system and understand why moving it to modern .NET requires replacing WF with a message-driven design."
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">
+        <div class="bar" style="background:var(--purple-400);"></div>
+        6.3 — A sane migration strategy (the incremental way)
+      </div>
+      <p>Nobody sensible "big-bangs" a large legacy app. The expected, senior answer is <strong>incremental migration</strong>:</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);">
+          <div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div>
+          <div class="flow-text"><div><strong>Inventory &amp; assess</strong></div><div class="flow-note" style="color:var(--purple-600);">Catalogue dependencies and flag the Framework-only tech that can't port directly. Run the <strong>.NET Upgrade Assistant</strong> / portability analyzer to get a report.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);">
+          <div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">2</div>
+          <div class="flow-text"><div><strong>Extract shared logic to .NET Standard</strong></div><div class="flow-note" style="color:var(--blue-600);">Move pure business logic into <code class="inline">netstandard2.0</code> libraries so both the old and new apps can use the same code during the transition.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);">
+          <div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div>
+          <div class="flow-text"><div><strong>Strangler-fig: migrate piece by piece</strong></div><div class="flow-note" style="color:var(--teal-600);">Stand up the new Core app alongside the old one and route features over gradually, retiring old endpoints as new ones go live. The old app shrinks until it disappears.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);">
+          <div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">4</div>
+          <div class="flow-text"><div><strong>Replace the unportable bits</strong></div><div class="flow-note" style="color:var(--amber-600);">Re-implement WebForms → Razor/Blazor, WCF → gRPC/Web API, WF → message-driven flows, <code class="inline">web.config</code> → <code class="inline">appsettings.json</code>.</div></div>
+        </div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);">
+          <div class="flow-num" style="background:var(--green-100);color:var(--green-800);">5</div>
+          <div class="flow-text"><div><strong>Decommission the legacy app</strong></div><div class="flow-note" style="color:var(--green-600);">Once all traffic flows through the modern app, retire the Framework version.</div></div>
+        </div>
+      </div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Term to drop in interviews — Strangler Fig</div>
+        The <strong>strangler-fig pattern</strong> (named after the vine that grows around a tree and gradually replaces it) means building the new system <em>around</em> the old one and migrating functionality bit by bit, instead of a risky all-at-once rewrite. Naming this pattern signals maturity.
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 7 ════════════════ -->
+  <div class="chapter ch-green" id="ch7">
+    <div class="chapter-header">
+      <div class="chapter-num">07</div>
+      <div>
+        <h2>Interview Preparation</h2>
+        <div class="ch-sub">Questions and model answers at the 4 YOE level</div>
+      </div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q1</span>What's the difference between .NET Framework and .NET Core?</div>
+      <div class="interview-a"><span class="a-label">A</span>.NET Framework is the original 2002 platform: Windows-only, machine-wide, monolithic, welded to IIS, and now frozen at 4.8.x with no new features. .NET Core is a from-scratch rewrite that is cross-platform (Windows/Linux/macOS), open source, modular, installed per-app with side-by-side versioning, and significantly faster. Since .NET 5 the "Core" name was dropped and it's just called ".NET" — so .NET 5/6/7/8 are the modern continuation of Core, not of Framework.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q2</span>Why did Microsoft build .NET Core when Framework already existed?</div>
+      <div class="interview-a"><span class="a-label">A</span>Because Framework's core design assumptions no longer fit the modern world. It was Windows-only (but the cloud runs on Linux), machine-wide with no side-by-side versioning (causing "DLL hell"), tied to IIS, monolithic, and slow to release. Rather than keep patching it, Microsoft rewrote .NET to be cross-platform, open-source, modular, app-local, and high-performance — which is what containers, microservices, and cloud hosting demand.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q3</span>Is .NET 8 the same as .NET Framework 4.8? It has a higher number.</div>
+      <div class="interview-a"><span class="a-label">A</span>No — they're different lineages. .NET 8 is the modern Core line; Framework 4.8 is the legacy line. The higher number is coincidental. Microsoft deliberately renamed Core to ".NET 5" and skipped "4" precisely so people wouldn't mistake it for an upgrade of Framework 4.x. .NET 8 descends from .NET Core 3.1, not from Framework 4.8.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q4</span>Why is .NET Core faster than .NET Framework?</div>
+      <div class="interview-a"><span class="a-label">A</span>Several reasons compound: a modern JIT (RyuJIT) that produces better native code, a garbage collector tuned for server and container workloads, the lightweight cross-platform Kestrel web server, and a web stack (ASP.NET Core) rewritten to minimise allocations. It also supports Native AOT for near-instant startup. ASP.NET Core regularly ranks among the fastest mainstream web frameworks in public benchmarks.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q5</span>What is .NET Standard and is it still relevant?</div>
+      <div class="interview-a"><span class="a-label">A</span>.NET Standard is a specification — a contract of APIs that all .NET platforms agree to implement — so a single library targeting it can run on both Framework and Core. It was essential during the transition years for sharing libraries across both worlds. Since .NET 5 unified the platforms, new code just targets <code class="inline">net8.0</code>, so .NET Standard is mostly historical. The one remaining use case is writing a shared library that must still be consumed by a legacy Framework app.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q6</span>What's the difference between framework-dependent and self-contained deployment?</div>
+      <div class="interview-a"><span class="a-label">A</span>Framework-dependent ships only your app and relies on the .NET runtime already being installed on the target — small output, but the runtime must exist. Self-contained bundles the runtime inside your app, so the target needs nothing pre-installed — larger output, but fully portable and version-pinned. Modern .NET also adds single-file, trimming, and Native AOT on top. Framework had essentially only the "runtime must already be installed" model.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q7</span>What does NOT port when migrating a Framework app to modern .NET?</div>
+      <div class="interview-a"><span class="a-label">A</span>The Framework-only technologies: Web Forms, server-side WCF hosting, Windows Workflow Foundation, AppDomains, and .NET Remoting. Most business logic, EF, LINQ, and common APIs port cleanly. The unportable pieces must be re-architected — Web Forms to Razor/Blazor, WCF to gRPC or Web API, WF to a message-driven design, AppDomains to separate processes. The sensible approach is incremental migration using the strangler-fig pattern rather than a big-bang rewrite.</div>
+    </div>
+
+    <div class="interview-block">
+      <div class="interview-q"><span class="q-label">Q8</span>Should every app be migrated to modern .NET?</div>
+      <div class="interview-a"><span class="a-label">A</span>For any <em>new</em> project, yes — modern .NET is faster, cross-platform, and where all investment goes. But an existing, stable Framework app that depends heavily on Framework-only tech may not be worth the migration cost, especially if it changes rarely. The mature position is that the decision is a cost/benefit trade-off, not a reflex — and knowing when <em>not</em> to migrate is itself a sign of judgement.</div>
+    </div>
+  </div>
+
+  <!-- ════════════════ CHAPTER 8 ════════════════ -->
+  <div class="chapter ch-blue" id="ch8">
+    <div class="chapter-header">
+      <div class="chapter-num">08</div>
+      <div>
+        <h2>What a 4 YOE Engineer Must Know</h2>
+        <div class="ch-sub">Interview ROI Matrix — master vs. skip</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--teal-800); margin-bottom:10px; padding: 8px 12px; background:var(--teal-50); border-radius:8px;">✅ Must Know (High ROI)</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Explain Framework vs Core clearly in one paragraph (platform, open source, install model, performance, future)</span></li>
+          <li><span class="check">✓</span><span>Explain <em>why</em> Core was created — the cloud/Linux/container drivers</span></li>
+          <li><span class="check">✓</span><span>Untangle the naming: Core 3.1 → .NET 5 → 6 → 8, and that .NET 8 ≠ Framework 4.8</span></li>
+          <li><span class="check">✓</span><span>Name the architectural differences: CoreCLR, RyuJIT, app-local vs GAC, no side-by-side in Framework</span></li>
+          <li><span class="check">✓</span><span>Framework-dependent vs self-contained deployment, and why it matters for Docker</span></li>
+          <li><span class="check">✓</span><span>What does/doesn't port, and the incremental (strangler-fig) migration strategy</span></li>
+          <li><span class="check">✓</span><span>Know what .NET Standard is and when it's still useful</span></li>
+          <li><span class="check">✓</span><span>Articulate when NOT to migrate (judgement question)</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:var(--gray-800); margin-bottom:10px; padding: 8px 12px; background:var(--gray-50); border-radius:8px;">⏭️ Can Skip for Now (Low ROI)</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Memorising exact release dates and version numbers beyond the broad timeline</span></li>
+          <li><span class="check">○</span><span>Deep internals of the GC algorithms or IL opcodes</span></li>
+          <li><span class="check">○</span><span>The full history of Mono / Xamarin unification (know it existed, skip the detail)</span></li>
+          <li><span class="check">○</span><span>Hand-writing Native AOT / trimming configuration — know the concept, skip the flags</span></li>
+          <li><span class="check">○</span><span>Every CoreWCF/legacy-bridge library — know the replacement exists, skip specifics</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════ QUICK REVISION BOX ════════════════ -->
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item">
+        <strong>One-liner:</strong> Framework = old Windows-only 2002 engine (frozen at 4.8). Core = modern, cross-platform, open-source rewrite. Both run C#; they're siblings, not versions.
+      </div>
+      <div class="rev-item">
+        <strong>Naming:</strong> Core 1.0→3.1, then renamed (skipping "4") to <code>.NET 5</code> → 6 → <code>8 (LTS)</code>. ".NET 8" is modern Core, NOT Framework 4.8.
+      </div>
+      <div class="rev-item">
+        <strong>Why Core exists:</strong> Linux/cloud/containers, no DLL hell (side-by-side), not IIS-bound, modular, faster, annual releases.
+      </div>
+      <div class="rev-item">
+        <strong>Architecture:</strong> Framework = CLR + GAC + machine-wide. Core = CoreCLR + RyuJIT + app-local NuGet, no GAC.
+      </div>
+      <div class="rev-item">
+        <strong>Deployment:</strong> Framework-dependent (small, needs runtime) vs Self-contained (bundles runtime, runs anywhere). Plus single-file, trimming, AOT.
+      </div>
+      <div class="rev-item">
+        <strong>TFM:</strong> <code>net8.0</code> = modern, <code>net48</code> = Framework, <code>netstandard2.0</code> = shared contract for both worlds.
+      </div>
+      <div class="rev-item">
+        <strong>Won't port:</strong> Web Forms, server-side WCF, Windows Workflow Foundation, AppDomains, .NET Remoting.
+      </div>
+      <div class="rev-item">
+        <strong>Migration:</strong> incremental, <strong>strangler-fig</strong> pattern, .NET Upgrade Assistant, .NET Standard as the bridge. Know when NOT to migrate.
+      </div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

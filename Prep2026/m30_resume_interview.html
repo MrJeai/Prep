@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 12 · M30 — Resume, LinkedIn & Interview Strategy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 12 · Module 30</div>
+    <h1>Resume &amp; Interview Strategy</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — Resume &amp; Impact Bullets</a>
+  <a class="nav-item" href="#ch2">02 — ATS &amp; Your Narrative</a>
+  <a class="nav-item" href="#ch3">03 — LinkedIn</a>
+  <a class="nav-item" href="#ch4">04 — Mock &amp; Behavioural Prep</a>
+  <a class="nav-item" href="#ch5">05 — Application Strategy</a>
+  <a class="nav-item" href="#ch6">06 — Putting It Together</a>
+  <a class="nav-item" href="#ch7">07 — The Final Checklist</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 12 — Module 30 · Landing the Role</div>
+    <h1>Resume, LinkedIn &amp; Interview Strategy</h1>
+    <p>You've built the skills across 29 modules — this final one converts them into offers. A strong resume gets you interviews; a clear narrative and behavioural prep get you through them; a smart application strategy maximises your shots. This is the capstone: practical, specific, and tuned for a ~4 YOE engineer moving from a legacy stack to modern .NET.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#f38ba8;"></div> Interview ROI: Critical</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> Career</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 12 · Phase 3</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Resume &amp; Impact Bullets</h2><div class="ch-sub">A recruiter spends ~10 seconds — earn them</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.1 — Structure (one page, scannable)</div>
+      <p>Order: <strong>Contact</strong> → <strong>Summary</strong> (2 lines) → <strong>Skills</strong> → <strong>Experience</strong> (most space) → <strong>Projects</strong> → <strong>Education</strong>. Reverse-chronological, consistent formatting, no photo, PDF.</p>
+      <div class="section-title" style="margin-top:14px;"><div class="bar" style="background:var(--purple-400);"></div>1.2 — The impact-bullet formula</div>
+      <div class="callout definition"><div class="callout-label">📖 XYZ / STAR for bullets</div>"<strong>Accomplished [X]</strong>, measured by <strong>[Y]</strong>, by doing <strong>[Z]</strong>." Lead with an action verb, attach a <strong>number</strong>, name the tech. Quantify even with estimates.</div>
+      <div class="mistakes-grid">
+        <div class="mistake-item"><div class="mistake-icon">❌</div><div class="mistake-body"><div class="mistake-title">Weak (duty)</div><div class="mistake-desc">"Responsible for working on APIs and fixing bugs."</div></div></div>
+        <div class="mistake-item"><div class="mistake-icon">✅</div><div class="mistake-body"><div class="mistake-title">Strong (impact)</div><div class="mistake-desc">"Cut API p95 latency 40% by adding Redis caching and fixing N+1 queries in EF Core, serving 50K+ daily requests."</div><div class="mistake-fix">→ verb + number + tech + outcome.</div></div></div>
+      </div>
+      <div class="callout tip"><div class="callout-label">💡 You already have the vocabulary</div>Every bullet can now cite real concepts from this course — caching (M17), N+1 (M10), async scalability (M9), CI/CD (M22). Reframe existing work using this language; you don't need a new job to write stronger bullets.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>ATS &amp; Your Narrative</h2><div class="ch-sub">Get past the filter, tell a clear story</div></div></div>
+    <div class="section">
+      <div class="callout definition"><div class="callout-label">📖 ATS (Applicant Tracking System)</div>Software that screens resumes before a human sees them, often matching <strong>keywords</strong> from the job description. Beat it with a clean single-column layout (no tables/graphics that break parsing), standard section headings, and the <em>exact</em> terms from the posting where they're true: ".NET 8", "ASP.NET Core", "EF Core", "Redis", "Docker", "microservices", "REST APIs".</div>
+      <div class="callout tip"><div class="callout-label">💡 Tailor per application</div>Mirror each job description's language. If it says "RESTful services" use that phrasing; if "CI/CD pipelines", ensure those words appear. Small edits, big difference in pass-through rate.</div>
+      <div class="section-title" style="margin-top:14px;"><div class="bar" style="background:var(--teal-400);"></div>Your legacy → modern narrative</div>
+      <p>Frame the transition as a <strong>strength</strong>, not a gap: "4 years building and maintaining production .NET systems, recently deepening modern .NET 8 — Clean Architecture, EF Core, containerised microservices, and cloud deployment." Maintaining legacy systems shows you understand real-world constraints; the modern study shows initiative. That combination is attractive.</p>
+    </div>
+  </div>
+
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>LinkedIn</h2><div class="ch-sub">Where recruiters find you</div></div></div>
+    <div class="section">
+      <ul class="checklist knows" style="margin-top:6px;">
+        <li><span class="check">✓</span><span><strong>Headline</strong> — not just "Software Engineer": "Backend Engineer · .NET 8 · ASP.NET Core · Azure · Microservices". Keywords recruiters search.</span></li>
+        <li><span class="check">✓</span><span><strong>About</strong> — 3–4 lines: who you are, your stack, what you're looking for.</span></li>
+        <li><span class="check">✓</span><span><strong>Experience</strong> — mirror your resume's impact bullets.</span></li>
+        <li><span class="check">✓</span><span><strong>Skills</strong> — list the keywords; they're searchable and endorsable.</span></li>
+        <li><span class="check">✓</span><span><strong>"Open to work"</strong> — set it (recruiter-only visibility is an option); a clear photo and complete profile rank higher.</span></li>
+      </ul>
+      <div class="callout note"><div class="callout-label">📝 Optional edge</div>A pinned GitHub with a clean .NET 8 project (Clean Architecture + Docker + tests + a README) demonstrates everything in this course better than any bullet. Even one polished repo stands out.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Mock &amp; Behavioural Prep</h2><div class="ch-sub">Practising the rounds you'll actually face</div></div></div>
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.1 — The typical loop</div>
+      <table class="comp-table">
+        <tr><th>Round</th><th>Covered by</th></tr>
+        <tr><td>Phone screen / recruiter</td><td>This module</td></tr>
+        <tr><td>DSA / coding</td><td>Module 25</td></tr>
+        <tr><td>.NET / backend technical</td><td>Modules 1–24</td></tr>
+        <tr><td>System design (HLD/LLD)</td><td>Modules 26–28</td></tr>
+        <tr><td>Behavioural / hiring manager</td><td>Below</td></tr>
+      </table>
+      <div class="section-title" style="margin-top:14px;"><div class="bar" style="background:var(--amber-200);"></div>4.2 — Behavioural with STAR</div>
+      <div class="callout definition"><div class="callout-label">📖 STAR</div><strong>S</strong>ituation → <strong>T</strong>ask → <strong>A</strong>ction → <strong>R</strong>esult. Prepare 5–6 stories (a hard bug, a conflict, a tight deadline, a leadership/ownership moment, a failure you learned from) and map them to common prompts. End with a measurable result.</div>
+      <div class="callout tip"><div class="callout-label">💡 Mock practice</div>Practise out loud — explain a concept, solve a DSA problem narrating your thinking (M25), and walk an HLD (M27) on paper. Record yourself or pair with a peer. Speaking fluently is a separate skill from knowing the answer, and it's trainable.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Application Strategy</h2><div class="ch-sub">Maximising and converting your shots</div></div></div>
+    <div class="section">
+      <ul class="checklist knows" style="margin-top:6px;">
+        <li><span class="check">✓</span><span><strong>Referrals first</strong> — a referral hugely outperforms a cold application. Reconnect with ex-colleagues; politely ask. It's the single highest-leverage move.</span></li>
+        <li><span class="check">✓</span><span><strong>Volume + consistency</strong> — apply steadily; it's a numbers game with a low per-application hit rate. Track applications in a sheet.</span></li>
+        <li><span class="check">✓</span><span><strong>Target fit</strong> — apply even at ~70% match; job descriptions are wish-lists. Product companies on modern .NET fit your goal range.</span></li>
+        <li><span class="check">✓</span><span><strong>Interview in waves</strong> — cluster interviews so you have offers in parallel for leverage, and so you warm up on lower-priority targets first.</span></li>
+        <li><span class="check">✓</span><span><strong>Negotiate</strong> — you can almost always negotiate; competing offers and market data (Glassdoor/levels) are your leverage. Be polite, specific, and patient.</span></li>
+      </ul>
+      <div class="callout warning"><div class="callout-label">⚠️ Don't stop prepping after one offer</div>Keep your pipeline alive until you've signed. More options means better leverage and a calmer mindset — which itself improves interview performance.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Putting It Together</h2><div class="ch-sub">The 12-week journey, recapped</div></div></div>
+    <div class="section">
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">①</div><div class="card-title">Phase 1 (M1–16)</div><div class="card-body">Modern .NET mastery — HTTP, Core architecture, DI, EF Core, SQL, auth, Clean Architecture, SOLID, patterns, testing.</div></div>
+        <div class="info-card"><div class="card-icon">②</div><div class="card-title">Phase 2 (M17–24)</div><div class="card-body">Scalable backend &amp; cloud — caching/Redis, performance, microservices, messaging, Docker, CI/CD, Azure, observability.</div></div>
+        <div class="info-card"><div class="card-icon">③</div><div class="card-title">Phase 3 (M25–30)</div><div class="card-body">Interview mode — DSA, system design (fundamentals/HLD/LLD), Git, and this career-conversion module.</div></div>
+      </div>
+      <div class="callout tip"><div class="callout-label">💡 How it all connects</div>Notice the recurring threads: <strong>statelessness</strong> (REST → caching → scaling → cloud), <strong>idempotency</strong> (HTTP → messaging → microservices), <strong>dependency inversion</strong> (DI → SOLID → Clean Architecture → LLD). Interviewers love when you connect concepts across domains — that's what separates a 4 YOE engineer from a junior who learned topics in isolation.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>The Final Checklist</h2><div class="ch-sub">Do these, then start applying</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Before You Apply</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>One-page resume with quantified impact bullets</span></li>
+          <li><span class="check">✓</span><span>ATS-clean, tailored keywords per role</span></li>
+          <li><span class="check">✓</span><span>LinkedIn headline + About + "Open to work"</span></li>
+          <li><span class="check">✓</span><span>One polished .NET 8 GitHub project</span></li>
+          <li><span class="check">✓</span><span>5–6 STAR stories rehearsed aloud</span></li>
+          <li><span class="check">✓</span><span>Referral list drafted; tracking sheet ready</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Mindset Reminders</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Rejections are normal — it's a numbers game</span></li>
+          <li><span class="check">○</span><span>Apply at ~70% match; JDs are wish-lists</span></li>
+          <li><span class="check">○</span><span>Keep the pipeline alive until you sign</span></li>
+          <li><span class="check">○</span><span>Always negotiate, politely</span></li>
+        </ul>
+      </div>
+    </div>
+      <div class="callout note" style="margin-top:16px;"><div class="callout-label">📝 A note on accuracy</div>These notes are written to be interview-accurate, but before relying on any Quick Revision box, cross-check specifics against the official Microsoft Learn docs — APIs and defaults evolve, and showing you can verify against primary sources is itself a senior habit.</div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Resume:</strong> one page, reverse-chron. Impact bullets = action verb + number + tech + outcome. Quantify everything.</div>
+      <div class="rev-item"><strong>ATS:</strong> single-column, standard headings, exact JD keywords (.NET 8, EF Core, Redis, Docker…). Tailor per role.</div>
+      <div class="rev-item"><strong>Narrative:</strong> legacy maintenance + modern .NET study = real-world judgment + initiative. Frame as strength.</div>
+      <div class="rev-item"><strong>LinkedIn:</strong> keyword headline, About, mirrored bullets, skills, "Open to work". Pin a clean .NET 8 repo.</div>
+      <div class="rev-item"><strong>Rounds:</strong> screen → DSA (M25) → backend (M1–24) → system design (M26–28) → behavioural (STAR). Practise aloud.</div>
+      <div class="rev-item"><strong>Strategy:</strong> referrals first, apply consistently at ~70% match, interview in waves, always negotiate, keep pipeline alive.</div>
+      <div class="rev-item"><strong>Threads to connect:</strong> statelessness, idempotency, dependency inversion — span the whole syllabus. Connect concepts in interviews.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

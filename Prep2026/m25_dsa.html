@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 9 · M25 — Data Structures & Algorithms</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 9 · Module 25</div>
+    <h1>DSA for Interviews</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — Big-O Complexity</a>
+  <a class="nav-item" href="#ch2">02 — Core Data Structures</a>
+  <a class="nav-item" href="#ch3">03 — Patterns I</a>
+  <a class="nav-item" href="#ch4">04 — Patterns II</a>
+  <a class="nav-item" href="#ch5">05 — Patterns III &amp; DP</a>
+  <a class="nav-item" href="#ch6">06 — Solving Approach &amp; Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 9 — Module 25 · Problem Solving</div>
+    <h1>Data Structures &amp; Algorithms</h1>
+    <p>DSA is the gatekeeper round at most product companies. The good news: you don't need to memorise hundreds of problems — you need a handful of recognisable <em>patterns</em> and the judgment to map a new problem onto one. This module covers complexity, the core data structures, and the pattern playbook that solves the majority of interview questions.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> Patterns over memorisation</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 9 · Phase 3</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header"><div class="chapter-num">01</div><div><h2>Big-O Complexity</h2><div class="ch-sub">The language of efficiency</div></div></div>
+    <div class="section">
+      <p><strong>Big-O</strong> describes how an algorithm's time or space grows as the input size <em>n</em> grows — focusing on the dominant term and ignoring constants. It's the first thing an interviewer asks after you code: "what's the time and space complexity?"</p>
+      <table class="comp-table">
+        <tr><th>Big-O</th><th>Name</th><th>Example</th></tr>
+        <tr><td>O(1)</td><td>Constant</td><td>Hash lookup, array index</td></tr>
+        <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search</td></tr>
+        <tr><td>O(n)</td><td>Linear</td><td>Single loop over input</td></tr>
+        <tr><td>O(n log n)</td><td>Linearithmic</td><td>Efficient sorting</td></tr>
+        <tr><td>O(n²)</td><td>Quadratic</td><td>Nested loops over input</td></tr>
+        <tr><td>O(2ⁿ)</td><td>Exponential</td><td>Naive recursion (e.g. plain Fibonacci)</td></tr>
+      </table>
+      <div class="callout tip"><div class="callout-label">💡 Always state both</div>Quote <strong>time and space</strong>. A hashmap often turns an O(n²) brute force into O(n) time at the cost of O(n) space — naming that trade-off out loud is exactly what interviewers reward.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>Core Data Structures</h2><div class="ch-sub">What they cost, and when to reach for them</div></div></div>
+    <div class="section">
+      <table class="comp-table">
+        <tr><th>Structure</th><th>Key ops &amp; cost</th><th>Use when</th></tr>
+        <tr><td><strong>Array / List</strong></td><td>Index O(1); search O(n)</td><td>Ordered data, index access</td></tr>
+        <tr><td><strong>Hash map (Dictionary)</strong></td><td>Insert/lookup O(1) avg</td><td>Fast lookup, counting, dedupe</td></tr>
+        <tr><td><strong>Hash set</strong></td><td>Contains O(1) avg</td><td>Membership / uniqueness</td></tr>
+        <tr><td><strong>Stack</strong> (LIFO)</td><td>Push/pop O(1)</td><td>Undo, matching brackets, DFS</td></tr>
+        <tr><td><strong>Queue</strong> (FIFO)</td><td>Enqueue/dequeue O(1)</td><td>BFS, scheduling</td></tr>
+        <tr><td><strong>Linked list</strong></td><td>Insert/delete O(1) at node; search O(n)</td><td>Frequent insert/remove</td></tr>
+        <tr><td><strong>Tree (BST)</strong></td><td>Search/insert O(log n) balanced</td><td>Sorted/hierarchical data</td></tr>
+        <tr><td><strong>Heap (priority queue)</strong></td><td>Peek O(1); push/pop O(log n)</td><td>Top-K, min/max on the fly</td></tr>
+        <tr><td><strong>Graph</strong></td><td>Traversal O(V+E)</td><td>Networks, relationships</td></tr>
+      </table>
+      <div class="callout note"><div class="callout-label">📝 C# names</div><code class="inline">List&lt;T&gt;</code>, <code class="inline">Dictionary&lt;K,V&gt;</code>, <code class="inline">HashSet&lt;T&gt;</code>, <code class="inline">Stack&lt;T&gt;</code>, <code class="inline">Queue&lt;T&gt;</code>, <code class="inline">PriorityQueue&lt;TElement,TPriority&gt;</code>, <code class="inline">LinkedList&lt;T&gt;</code>. Knowing these map directly to the abstract structures saves time in a C# interview.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>Pattern Playbook I</h2><div class="ch-sub">Hashing · Two Pointers · Sliding Window · Binary Search</div></div></div>
+    <div class="section">
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Hashing / frequency map</div><div class="method-card-body"><strong>Signal:</strong> "have we seen…", counting, dedupe, "two things that sum to X."<br>Trade space for speed — O(n) with a Dictionary/HashSet. (Two Sum is the canonical example.)</div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">Two Pointers</div><div class="method-card-body"><strong>Signal:</strong> a <em>sorted</em> array, pair/triplet sums, palindrome check, removing duplicates in place.<br>Two indices moving toward/with each other → O(n) instead of O(n²).</div></div>
+        <div class="method-card" style="border-color:var(--amber-200);"><div class="method-card-head" style="background:var(--amber-50);color:var(--amber-800);">Sliding Window</div><div class="method-card-body"><strong>Signal:</strong> "longest/shortest subarray or substring meeting a condition."<br>Expand/shrink a window over the array → O(n) instead of recomputing each range.</div></div>
+        <div class="method-card" style="border-color:var(--blue-200);"><div class="method-card-head" style="background:var(--blue-50);color:var(--blue-800);">Binary Search</div><div class="method-card-body"><strong>Signal:</strong> sorted input, or "find the minimum value that satisfies…"<br>Halve the search space each step → O(log n). Watch the boundary conditions.</div></div>
+      </div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">Two Sum — hashing in O(n)</span></div><pre><span class="kw">int</span>[] <span class="meth">TwoSum</span>(<span class="kw">int</span>[] nums, <span class="kw">int</span> target) {
+    <span class="kw">var</span> seen = <span class="kw">new</span> <span class="type">Dictionary</span>&lt;<span class="kw">int</span>,<span class="kw">int</span>&gt;();
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; i &lt; nums.Length; i++) {
+        <span class="kw">int</span> need = target - nums[i];
+        <span class="kw">if</span> (seen.<span class="meth">ContainsKey</span>(need)) <span class="kw">return new</span>[]{ seen[need], i };
+        seen[nums[i]] = i;
+    }
+    <span class="kw">return</span> <span class="type">Array</span>.Empty&lt;<span class="kw">int</span>&gt;();
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>Pattern Playbook II</h2><div class="ch-sub">Recursion/Backtracking · Trees (BFS/DFS) · Stack</div></div></div>
+    <div class="section">
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--purple-200);"><div class="method-card-head" style="background:var(--purple-50);color:var(--purple-800);">Recursion &amp; Backtracking</div><div class="method-card-body"><strong>Signal:</strong> "generate all combinations/permutations/subsets," puzzles, exploring choices.<br>Make a choice, recurse, then undo it ("backtrack"). Always define the base case first.</div></div>
+        <div class="method-card" style="border-color:var(--green-200);"><div class="method-card-head" style="background:var(--green-50);color:var(--green-800);">Tree DFS / BFS</div><div class="method-card-body"><strong>DFS</strong> (stack/recursion): depth, paths, "does a path exist." <strong>BFS</strong> (queue): shortest path / level-order. Most tree &amp; graph questions are one of these two.</div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">Stack</div><div class="method-card-body"><strong>Signal:</strong> matching/nesting (valid parentheses), "next greater element," evaluating expressions, undo. LIFO is the clue.</div></div>
+        <div class="method-card" style="border-color:var(--blue-200);"><div class="method-card-head" style="background:var(--blue-50);color:var(--blue-800);">Queue / BFS</div><div class="method-card-body"><strong>Signal:</strong> shortest path in an unweighted graph/grid, level-by-level processing. FIFO is the clue.</div></div>
+      </div>
+      <div class="code-block"><div class="code-header"><span class="lang-tag">C#</span><span class="file-name">BFS skeleton (level-order)</span></div><pre><span class="kw">var</span> q = <span class="kw">new</span> <span class="type">Queue</span>&lt;<span class="type">Node</span>&gt;(); q.<span class="meth">Enqueue</span>(root);
+<span class="kw">while</span> (q.Count &gt; <span class="num">0</span>) {
+    <span class="kw">var</span> node = q.<span class="meth">Dequeue</span>();
+    <span class="cmt">// process node</span>
+    <span class="kw">foreach</span> (<span class="kw">var</span> child <span class="kw">in</span> node.Children) q.<span class="meth">Enqueue</span>(child);
+}</pre></div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Pattern Playbook III &amp; Dynamic Programming</h2><div class="ch-sub">Linked List · Heap · DP</div></div></div>
+    <div class="section">
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Linked List</div><div class="method-card-body"><strong>Signal:</strong> reverse a list, detect a cycle, find the middle. Tools: dummy head node, and <strong>fast/slow pointers</strong> (Floyd's) for cycle/middle.</div></div>
+        <div class="method-card" style="border-color:var(--coral-200);"><div class="method-card-head" style="background:var(--coral-50);color:var(--coral-800);">Heap / Top-K</div><div class="method-card-body"><strong>Signal:</strong> "K largest/smallest," "K most frequent," merge K lists, running median. A heap keeps the best-K in O(n log k).</div></div>
+      </div>
+      <div class="section-title" style="margin-top:18px;"><div class="bar" style="background:var(--blue-400);"></div>Dynamic Programming — the one to demystify</div>
+      <p><strong>DP</strong> solves problems by breaking them into overlapping subproblems and <em>storing</em> each subproblem's answer so it's computed once. Two forms: <strong>memoization</strong> (top-down recursion + a cache) and <strong>tabulation</strong> (bottom-up filling a table).</p>
+      <div class="callout definition"><div class="callout-label">📖 When it's DP</div>Two signals together: <strong>optimal substructure</strong> (the answer is built from answers to smaller subproblems) and <strong>overlapping subproblems</strong> (the same subproblem recurs). Classic starters: Fibonacci, climbing stairs, coin change, longest common subsequence, 0/1 knapsack. Plain recursive Fibonacci is O(2ⁿ); adding a cache makes it O(n) — that contrast <em>is</em> the DP lesson.</div>
+      <div class="callout tip"><div class="callout-label">💡 At 4 YOE</div>You're rarely expected to solve hard DP under pressure, but you must <em>recognise</em> a DP problem, explain memoization vs tabulation, and code an easy/medium one (climbing stairs, coin change). Don't over-invest in advanced DP at the expense of the high-frequency patterns above.</div>
+    </div>
+  </div>
+
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Solving Approach &amp; Interview Prep</h2><div class="ch-sub">A repeatable method + practice questions</div></div></div>
+    <div class="section">
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);"><div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div><div class="flow-text"><div><strong>Clarify</strong> — inputs, outputs, constraints, edge cases. Ask before coding.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">2</div><div class="flow-text"><div><strong>Brute force first</strong> — state a working approach + its complexity out loud.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);"><div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">3</div><div class="flow-text"><div><strong>Optimise</strong> — which pattern fits? Often hashing/two-pointers/window removes a loop.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">4</div><div class="flow-text"><div><strong>Code, then test</strong> — walk an example, check edge cases (empty, one element, duplicates).</div></div></div>
+      </div>
+      <div class="callout warning"><div class="callout-label">⚠️ Communicate, don't go silent</div>Interviewers grade your <em>thinking</em>, not just the final code. Narrate your reasoning, state complexity, and admit trade-offs. A clear thought process with a brute-force solution often beats silent struggle toward the optimal.</div>
+      <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>What's the time complexity and how would you improve a nested-loop solution?</div><div class="interview-a"><span class="a-label">A</span>A nested loop over the input is O(n²). I'd look for a hashing pattern — storing what I've seen in a Dictionary or HashSet to make lookups O(1) — which often drops it to O(n) time at O(n) extra space, like turning the brute-force Two Sum into a single pass.</div></div>
+      <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>When do you use BFS vs DFS?</div><div class="interview-a"><span class="a-label">A</span>BFS, using a queue, explores level by level and is the go-to for shortest paths in unweighted graphs or grids and for level-order traversal. DFS, using recursion or a stack, explores as deep as possible first and suits path existence, exploring all paths, and problems naturally defined recursively.</div></div>
+      <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>How do you detect a cycle in a linked list?</div><div class="interview-a"><span class="a-label">A</span>Floyd's fast/slow pointers: advance one pointer by one node and another by two. If they ever meet there's a cycle; if the fast pointer reaches the end there isn't. It's O(n) time and O(1) space, beating a HashSet of visited nodes on space.</div></div>
+      <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>What makes a problem dynamic programming, and what are the two styles?</div><div class="interview-a"><span class="a-label">A</span>It's DP when there's optimal substructure — the answer is built from smaller subproblem answers — and overlapping subproblems that recur. The two styles are memoization, which is top-down recursion with a cache, and tabulation, which builds a table bottom-up. Caching turns exponential recursion like naive Fibonacci into linear time.</div></div>
+      <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>How would you find the K most frequent elements?</div><div class="interview-a"><span class="a-label">A</span>Count frequencies in a Dictionary in O(n), then use a min-heap of size K, pushing each element and popping when it exceeds K, so the heap ends holding the top K in O(n log k). That beats fully sorting all counts when K is much smaller than n.</div></div>
+    </div>
+  </div>
+
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Big-O and stating time + space</span></li>
+          <li><span class="check">✓</span><span>Core structures &amp; their costs (+ C# names)</span></li>
+          <li><span class="check">✓</span><span>Hashing, two pointers, sliding window, binary search</span></li>
+          <li><span class="check">✓</span><span>BFS/DFS, stack/queue, recursion/backtracking</span></li>
+          <li><span class="check">✓</span><span>Linked-list tricks, heap/top-K, easy-medium DP</span></li>
+          <li><span class="check">✓</span><span>A spoken solving framework + communication</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>Hard DP (interval, bitmask, digit DP)</span></li>
+          <li><span class="check">○</span><span>Advanced graphs (Dijkstra/MST/topo) unless senior</span></li>
+          <li><span class="check">○</span><span>Segment trees, tries, union-find depth</span></li>
+          <li><span class="check">○</span><span>Memorising 500 problems — learn patterns</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>Big-O:</strong> O(1)&lt;O(log n)&lt;O(n)&lt;O(n log n)&lt;O(n²)&lt;O(2ⁿ). Always state time AND space.</div>
+      <div class="rev-item"><strong>Structures:</strong> array (index O(1)), hashmap/set (O(1) lookup), stack (LIFO), queue (FIFO), heap (top-K, O(log n)), tree, graph.</div>
+      <div class="rev-item"><strong>Hashing:</strong> "seen before"/count/sum-pairs → Dictionary/HashSet, O(n). Two Sum.</div>
+      <div class="rev-item"><strong>Two pointers</strong> (sorted, pairs, palindrome) · <strong>sliding window</strong> (longest/shortest substring) · <strong>binary search</strong> (sorted, O(log n)).</div>
+      <div class="rev-item"><strong>BFS</strong> (queue, shortest path/levels) vs <strong>DFS</strong> (stack/recursion, paths/depth). Stack = matching/next-greater.</div>
+      <div class="rev-item"><strong>Linked list:</strong> dummy head + fast/slow (Floyd) for cycle/middle. <strong>Heap:</strong> top-K in O(n log k).</div>
+      <div class="rev-item"><strong>DP:</strong> optimal substructure + overlapping subproblems. Memoization (top-down + cache) vs tabulation (bottom-up).</div>
+      <div class="rev-item"><strong>Approach:</strong> clarify → brute force + complexity → optimise via pattern → code + test edges. Narrate everything.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>

@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Week 1 · M1 — HTTP & REST Fundamentals</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap"/>
+<style>
+  :root {
+    --purple-50:#EEEDFE; --purple-100:#CECBF6; --purple-200:#AFA9EC; --purple-400:#7F77DD; --purple-600:#534AB7; --purple-800:#3C3489; --purple-900:#26215C;
+    --teal-50:#E1F5EE; --teal-100:#9FE1CB; --teal-200:#5DCAA5; --teal-400:#1D9E75; --teal-600:#0F6E56; --teal-800:#085041; --teal-900:#04342C;
+    --coral-50:#FAECE7; --coral-100:#F5C4B3; --coral-200:#F0997B; --coral-400:#D85A30; --coral-600:#993C1D; --coral-800:#712B13; --coral-900:#4A1B0C;
+    --amber-50:#FAEEDA; --amber-100:#FAC775; --amber-200:#EF9F27; --amber-400:#BA7517; --amber-600:#854F0B; --amber-800:#633806; --amber-900:#412402;
+    --blue-50:#E6F1FB; --blue-100:#B5D4F4; --blue-200:#85B7EB; --blue-400:#378ADD; --blue-600:#185FA5; --blue-800:#0C447C; --blue-900:#042C53;
+    --green-50:#EAF3DE; --green-100:#C0DD97; --green-200:#97C459; --green-400:#639922; --green-600:#3B6D11; --green-800:#27500A;
+    --red-50:#FCEBEB; --red-100:#F7C1C1; --red-200:#F09595; --red-400:#E24B4A; --red-600:#A32D2D; --red-800:#791F1F;
+    --gray-50:#F1EFE8; --gray-100:#D3D1C7; --gray-200:#B4B2A9; --gray-400:#888780; --gray-600:#5F5E5A; --gray-800:#444441; --gray-900:#2C2C2A;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    background: #f8f7f4;
+    color: #1a1a1a;
+    padding: 0;
+  }
+  code, pre { font-family: 'Fira Code', monospace; }
+
+  /* ── NAV SIDEBAR ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 230px;
+    height: 100vh;
+    background: var(--purple-900);
+    padding: 24px 0;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .sidebar-brand {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 12px;
+  }
+  .sidebar-brand .week-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-200);
+    margin-bottom: 4px;
+  }
+  .sidebar-brand h1 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.4;
+  }
+  .nav-section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--purple-400);
+    padding: 10px 20px 4px;
+  }
+  .nav-item {
+    display: block;
+    padding: 7px 20px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); border-left-color: var(--purple-200); }
+  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: var(--purple-100); }
+
+  /* ── MAIN CONTENT ── */
+  .main { margin-left: 230px; min-height: 100vh; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--purple-900) 0%, var(--purple-600) 60%, var(--purple-400) 100%);
+    padding: 52px 56px 48px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
+  .hero .chapter-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero h1 { font-size: 32px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero p { font-size: 15px; color: rgba(255,255,255,0.8); max-width: 600px; line-height: 1.7; }
+  .hero .meta-row { display: flex; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+  .hero .meta-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .hero .meta-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── PAGE LAYOUT ── */
+  .page-body { padding: 48px 56px; max-width: 900px; }
+
+  /* ── CHAPTERS ── */
+  .chapter { margin-bottom: 64px; }
+  .chapter-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid;
+  }
+  .chapter-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .chapter-header h2 { font-size: 22px; font-weight: 700; }
+  .chapter-header .ch-sub { font-size: 13px; font-weight: 400; margin-top: 2px; }
+
+  /* Color themes per chapter */
+  .ch-purple .chapter-header { border-color: var(--purple-200); }
+  .ch-purple .chapter-num { background: var(--purple-100); color: var(--purple-800); }
+  .ch-purple .chapter-header h2 { color: var(--purple-800); }
+  .ch-purple .chapter-header .ch-sub { color: var(--purple-600); }
+
+  .ch-teal .chapter-header { border-color: var(--teal-200); }
+  .ch-teal .chapter-num { background: var(--teal-50); color: var(--teal-800); }
+  .ch-teal .chapter-header h2 { color: var(--teal-800); }
+  .ch-teal .chapter-header .ch-sub { color: var(--teal-600); }
+
+  .ch-blue .chapter-header { border-color: var(--blue-200); }
+  .ch-blue .chapter-num { background: var(--blue-50); color: var(--blue-800); }
+  .ch-blue .chapter-header h2 { color: var(--blue-800); }
+  .ch-blue .chapter-header .ch-sub { color: var(--blue-600); }
+
+  .ch-coral .chapter-header { border-color: var(--coral-200); }
+  .ch-coral .chapter-num { background: var(--coral-50); color: var(--coral-800); }
+  .ch-coral .chapter-header h2 { color: var(--coral-800); }
+  .ch-coral .chapter-header .ch-sub { color: var(--coral-600); }
+
+  .ch-amber .chapter-header { border-color: var(--amber-200); }
+  .ch-amber .chapter-num { background: var(--amber-50); color: var(--amber-800); }
+  .ch-amber .chapter-header h2 { color: var(--amber-800); }
+  .ch-amber .chapter-header .ch-sub { color: var(--amber-600); }
+
+  .ch-green .chapter-header { border-color: var(--green-100); }
+  .ch-green .chapter-num { background: var(--green-50); color: var(--green-800); }
+  .ch-green .chapter-header h2 { color: var(--green-800); }
+  .ch-green .chapter-header .ch-sub { color: var(--green-600); }
+
+  /* ── SECTIONS within chapters ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+  .section p { color: #2a2a2a; margin-bottom: 12px; font-size: 14.5px; line-height: 1.8; }
+
+  /* ── CALLOUT BOXES ── */
+  .callout {
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 14px;
+    line-height: 1.75;
+    border-left: 4px solid;
+  }
+  .callout-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 6px; }
+  .callout.note { background: var(--blue-50); border-color: var(--blue-400); color: var(--blue-900); }
+  .callout.note .callout-label { color: var(--blue-600); }
+  .callout.warning { background: var(--amber-50); border-color: var(--amber-200); color: var(--amber-900); }
+  .callout.warning .callout-label { color: var(--amber-600); }
+  .callout.tip { background: var(--teal-50); border-color: var(--teal-200); color: var(--teal-900); }
+  .callout.tip .callout-label { color: var(--teal-600); }
+  .callout.danger { background: var(--red-50); border-color: var(--red-200); color: var(--red-800); }
+  .callout.danger .callout-label { color: var(--red-600); }
+  .callout.definition { background: var(--purple-50); border-color: var(--purple-200); color: var(--purple-900); }
+  .callout.definition .callout-label { color: var(--purple-600); }
+
+  /* ── CODE BLOCKS ── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .code-header {
+    background: #2a2a3e;
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .code-header .lang-tag {
+    font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    color: #8888aa;
+  }
+  .code-header .file-name { font-size: 11px; color: #6666aa; font-family: 'Fira Code', monospace; }
+  .code-block pre {
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin: 0;
+    line-height: 1.65;
+    color: #cdd6f4;
+  }
+  .code-block pre .kw { color: #cba6f7; }
+  .code-block pre .type { color: #89b4fa; }
+  .code-block pre .str { color: #a6e3a1; }
+  .code-block pre .cmt { color: #6c7086; font-style: italic; }
+  .code-block pre .num { color: #fab387; }
+  .code-block pre .meth { color: #89dceb; }
+  .code-block pre .anno { color: #f38ba8; }
+
+  /* ── INLINE CODE ── */
+  code.inline {
+    background: #e8e4f5;
+    color: var(--purple-800);
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 13px;
+    font-family: 'Fira Code', monospace;
+  }
+
+  /* ── COMPARISON TABLE ── */
+  .comp-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  .comp-table th {
+    text-align: left; padding: 10px 14px;
+    background: var(--purple-50); color: var(--purple-800);
+    font-weight: 600; font-size: 12px;
+    border-bottom: 2px solid var(--purple-200);
+  }
+  .comp-table td { padding: 10px 14px; border-bottom: 1px solid #eee; vertical-align: top; }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table tr:nth-child(even) td { background: #faf9f7; }
+
+  /* ── DIAGRAM (SVG-style HTML diagrams) ── */
+  .pipeline-diagram { margin: 24px 0; }
+
+  /* ── REQUEST FLOW BOXES ── */
+  .flow-container { display: flex; flex-direction: column; gap: 0; margin: 20px 0; }
+  .flow-row { display: flex; align-items: stretch; }
+  .flow-arrow-down {
+    display: flex; justify-content: center; align-items: center;
+    height: 30px; color: #888; font-size: 18px;
+  }
+  .flow-box {
+    flex: 1;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 500;
+    display: flex; align-items: center; gap: 12px;
+    border-left: 5px solid;
+    margin-bottom: 2px;
+  }
+  .flow-box .flow-num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .flow-box .flow-text { flex: 1; }
+  .flow-box .flow-note { font-size: 11.5px; font-weight: 400; margin-top: 2px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-purple { background: var(--purple-100); color: var(--purple-800); }
+  .badge-teal { background: var(--teal-50); color: var(--teal-800); }
+  .badge-coral { background: var(--coral-50); color: var(--coral-800); }
+  .badge-amber { background: var(--amber-50); color: var(--amber-800); }
+  .badge-blue { background: var(--blue-50); color: var(--blue-800); }
+  .badge-red { background: var(--red-50); color: var(--red-800); }
+  .badge-green { background: var(--green-50); color: var(--green-800); }
+
+  /* ── CARDS GRID ── */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 18px 0; }
+  .info-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e5e3e0;
+  }
+  .info-card .card-icon { font-size: 22px; margin-bottom: 10px; }
+  .info-card .card-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .info-card .card-body { font-size: 12.5px; color: #555; line-height: 1.65; }
+
+  /* ── INTERVIEW Q/A ── */
+  .interview-block {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e5e3e0;
+    overflow: hidden;
+    margin: 14px 0;
+  }
+  .interview-q {
+    background: var(--purple-50);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--purple-800);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .interview-q .q-label {
+    background: var(--purple-600);
+    color: #fff;
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .interview-a {
+    padding: 12px 18px;
+    font-size: 13.5px;
+    color: #2a2a2a;
+    line-height: 1.75;
+  }
+  .interview-a .a-label {
+    display: inline-block;
+    background: var(--teal-50);
+    color: var(--teal-800);
+    border-radius: 5px;
+    padding: 1px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  /* ── MISTAKE BLOCK ── */
+  .mistakes-grid { display: grid; gap: 12px; margin: 18px 0; }
+  .mistake-item {
+    display: flex; gap: 14px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid #e5e3e0;
+    align-items: flex-start;
+  }
+  .mistake-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .mistake-body { flex: 1; }
+  .mistake-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .mistake-desc { font-size: 13px; color: #555; line-height: 1.65; }
+  .mistake-fix { font-size: 12.5px; color: var(--teal-600); margin-top: 5px; font-weight: 500; }
+
+  /* ── QUICK REVISION BOX ── */
+  .revision-box {
+    background: var(--purple-900);
+    color: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin: 40px 0 0;
+  }
+  .revision-box h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--purple-100); letter-spacing: 0.5px; }
+  .revision-box .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .revision-box .rev-item { font-size: 12.5px; line-height: 1.7; color: rgba(255,255,255,0.8); }
+  .revision-box .rev-item strong { color: var(--purple-100); font-weight: 600; }
+  .revision-box code { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #a6e3a1; }
+
+  /* ── PIPELINE VISUAL ── */
+  .pipeline-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 24px 0;
+    position: relative;
+  }
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 13px 18px;
+    border-radius: 0;
+    position: relative;
+  }
+  .pipeline-stage:first-child { border-radius: 10px 10px 0 0; }
+  .pipeline-stage:last-child { border-radius: 0 0 10px 10px; }
+  .pipeline-stage .ps-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pipeline-stage .ps-name { font-size: 13.5px; font-weight: 600; flex: 1; }
+  .pipeline-stage .ps-desc { font-size: 12px; color: #666; }
+  .pipeline-stage .ps-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .pipeline-connector {
+    width: 2px;
+    height: 10px;
+    background: #ccc;
+    margin: 0 0 0 32px;
+  }
+
+  /* ── MATRYOSHKA DOLL VISUAL ── */
+  .matryoshka {
+    display: flex; flex-direction: column; align-items: center;
+    margin: 24px 0; gap: 0;
+  }
+  .m-layer {
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+  }
+
+  /* ── LIFECYCLE BIDIRECTIONAL ── */
+  .lifecycle {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+  .lc-step {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    position: relative;
+  }
+  .lc-box {
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .lc-arrow { font-size: 20px; color: #aaa; text-align: center; }
+  .lc-desc { font-size: 11px; color: #777; line-height: 1.5; }
+
+  /* ── THREE METHOD CARDS ── */
+  .method-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 18px 0; }
+  .method-card {
+    border-radius: 10px;
+    border: 2px solid;
+    overflow: hidden;
+  }
+  .method-card-head {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .method-card-body {
+    background: #fff;
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #2a2a2a;
+    line-height: 1.7;
+  }
+  .method-card-body ul { padding-left: 16px; margin: 6px 0; }
+  .method-card-body li { margin-bottom: 3px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid #e5e3e0; margin: 36px 0; }
+
+  /* ── CHECKLIST ── */
+  .checklist { list-style: none; padding: 0; margin: 12px 0; }
+  .checklist li { display: flex; gap: 10px; padding: 5px 0; font-size: 14px; align-items: flex-start; }
+  .checklist li .check { flex-shrink: 0; margin-top: 2px; font-size: 14px; }
+  .checklist.knows .check { color: var(--teal-400); }
+  .checklist.skip .check { color: var(--gray-400); }
+  .checklist.mistake .check { color: var(--red-400); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--purple-200); border-radius: 10px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { margin-left: 0; }
+    .hero { -webkit-print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <div class="week-tag">Week 1 · Module 1</div>
+    <h1>HTTP &amp; REST Fundamentals</h1>
+  </div>
+  <div class="nav-section-label">Chapters</div>
+  <a class="nav-item active" href="#ch1">01 — How the Web Talks</a>
+  <a class="nav-item" href="#ch2">02 — Anatomy of Request &amp; Response</a>
+  <a class="nav-item" href="#ch3">03 — Methods &amp; Status Codes</a>
+  <a class="nav-item" href="#ch4">04 — REST Principles</a>
+  <a class="nav-item" href="#ch5">05 — Designing RESTful APIs</a>
+  <a class="nav-item" href="#ch6">06 — Interview Prep</a>
+  <a class="nav-item" href="#ch7">07 — What to Know at 4 YOE</a>
+</nav>
+
+<main class="main">
+  <div class="hero">
+    <div class="chapter-badge">Week 1 — Module 1 · The Foundation</div>
+    <h1>HTTP &amp; REST Fundamentals</h1>
+    <p>Every web API you build sits on top of two things: the HTTP protocol and the REST style. Most developers use them daily without truly understanding them — and it shows in interviews. This module builds that understanding from the ground up, so that when you're asked "what does idempotent mean?" or "why PUT not POST?", you answer with reasoning, not memorised trivia.</p>
+    <div class="meta-row">
+      <div class="meta-pill"><div class="dot" style="background:#a6e3a1;"></div> Interview ROI: Very High</div>
+      <div class="meta-pill"><div class="dot" style="background:#fab387;"></div> Protocol &amp; API Design</div>
+      <div class="meta-pill"><div class="dot" style="background:#89b4fa;"></div> Week 1 · Phase 1</div>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+  <!-- CH1 -->
+  <div class="chapter ch-purple" id="ch1">
+    <div class="chapter-header">
+      <div class="chapter-num">01</div>
+      <div><h2>How the Web Talks</h2><div class="ch-sub">The client–server model and the request–response cycle</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.1 — What is HTTP, really?</div>
+      <p><strong>HTTP (HyperText Transfer Protocol)</strong> is the language browsers, mobile apps, and servers use to talk to each other over the internet. It is a set of agreed-upon rules for how a <em>client</em> asks for something and how a <em>server</em> replies. When you build a Web API in ASP.NET Core, you are not inventing a way to communicate — you are speaking HTTP, the same protocol the entire web runs on.</p>
+      <p>Three properties define HTTP, and each one shapes how you design APIs:</p>
+      <div class="cards-grid">
+        <div class="info-card"><div class="card-icon">📞</div><div class="card-title">Request–Response</div><div class="card-body">The client always speaks first by sending a <strong>request</strong>; the server answers with exactly one <strong>response</strong>. The server never initiates.</div></div>
+        <div class="info-card"><div class="card-icon">🧠</div><div class="card-title">Stateless</div><div class="card-body">Each request is independent. The server remembers nothing about previous requests unless you deliberately add state (cookies, tokens, a database).</div></div>
+        <div class="info-card"><div class="card-icon">📄</div><div class="card-title">Text-based</div><div class="card-body">HTTP messages are human-readable text (a start line, headers, and an optional body), which is why tools like Postman can show you exactly what's sent.</div></div>
+      </div>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Stateless</div>
+        <strong>Stateless</strong> means the server treats every request as brand new and keeps no memory of the client between requests. If a request needs context (e.g. "who am I?"), the client must supply it every time — typically as a token in a header. This is the single most important property to understand, because it's <em>why</em> APIs send a JWT on every call rather than "logging in once" on the server.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--purple-400);"></div>1.2 — The journey of one request</div>
+      <p>When a client calls <code class="inline">GET https://api.shop.com/products/42</code>, here is the full round trip:</p>
+      <div class="flow-container">
+        <div class="flow-box" style="background:var(--purple-50); border-color:var(--purple-400);"><div class="flow-num" style="background:var(--purple-200);color:var(--purple-800);">1</div><div class="flow-text"><div><strong>Client builds an HTTP request</strong></div><div class="flow-note" style="color:var(--purple-600);">Method (GET), URL, headers, optional body.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--blue-50); border-color:var(--blue-400);"><div class="flow-num" style="background:var(--blue-100);color:var(--blue-800);">2</div><div class="flow-text"><div><strong>DNS resolves the domain → IP, TCP/TLS connection opens</strong></div><div class="flow-note" style="color:var(--blue-600);">HTTPS adds a TLS handshake that encrypts everything.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--teal-50); border-color:var(--teal-400);"><div class="flow-num" style="background:var(--teal-100);color:var(--teal-800);">3</div><div class="flow-text"><div><strong>Server receives &amp; processes</strong></div><div class="flow-note" style="color:var(--teal-600);">Your ASP.NET Core app runs: middleware → routing → controller → DB.</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--amber-50); border-color:var(--amber-200);"><div class="flow-num" style="background:var(--amber-100);color:var(--amber-800);">4</div><div class="flow-text"><div><strong>Server returns one HTTP response</strong></div><div class="flow-note" style="color:var(--amber-600);">Status code, headers, body (usually JSON).</div></div></div>
+        <div class="flow-arrow-down">↓</div>
+        <div class="flow-box" style="background:var(--green-50); border-color:var(--green-200);"><div class="flow-num" style="background:var(--green-100);color:var(--green-800);">5</div><div class="flow-text"><div><strong>Client reads the response &amp; the cycle ends</strong></div><div class="flow-note" style="color:var(--green-600);">Connection may stay open (keep-alive) for reuse, but this exchange is complete.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH2 -->
+  <div class="chapter ch-teal" id="ch2">
+    <div class="chapter-header"><div class="chapter-num">02</div><div><h2>Anatomy of a Request &amp; Response</h2><div class="ch-sub">The exact parts of each message — what every byte means</div></div></div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.1 — A raw HTTP request</div>
+      <p>An HTTP request has four parts: a <strong>start line</strong> (method + path + version), <strong>headers</strong>, a blank line, and an optional <strong>body</strong>. Here is a real POST request:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">HTTP</span><span class="file-name">request</span></div>
+        <pre><span class="meth">POST</span> /api/products <span class="cmt">HTTP/1.1</span>          <span class="cmt">← start line: method, path, version</span>
+<span class="type">Host</span>: api.shop.com                 <span class="cmt">← headers (metadata)</span>
+<span class="type">Authorization</span>: Bearer eyJhbGciOi...   <span class="cmt">← who you are (a JWT)</span>
+<span class="type">Content-Type</span>: application/json       <span class="cmt">← format of the body</span>
+<span class="type">Accept</span>: application/json             <span class="cmt">← format you want back</span>
+                                       <span class="cmt">← blank line separates headers from body</span>
+{ <span class="str">"name"</span>: <span class="str">"Keyboard"</span>, <span class="str">"price"</span>: <span class="num">1200</span> }   <span class="cmt">← body (payload)</span></pre>
+      </div>
+      <table class="comp-table">
+        <tr><th>Part</th><th>What it is</th><th>Example</th></tr>
+        <tr><td><strong>Method</strong></td><td>The action you want (verb)</td><td><code class="inline">GET</code>, <code class="inline">POST</code></td></tr>
+        <tr><td><strong>Path / URL</strong></td><td>Which resource</td><td><code class="inline">/api/products/42</code></td></tr>
+        <tr><td><strong>Headers</strong></td><td>Metadata about the request</td><td><code class="inline">Content-Type</code>, <code class="inline">Authorization</code></td></tr>
+        <tr><td><strong>Body</strong></td><td>The payload (data you send)</td><td>JSON for POST/PUT</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--teal-400);"></div>2.2 — A raw HTTP response</div>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">HTTP</span><span class="file-name">response</span></div>
+        <pre><span class="cmt">HTTP/1.1</span> <span class="num">201</span> Created          <span class="cmt">← status line: version, code, reason</span>
+<span class="type">Content-Type</span>: application/json
+<span class="type">Location</span>: /api/products/42        <span class="cmt">← where the new resource lives</span>
+
+{ <span class="str">"id"</span>: <span class="num">42</span>, <span class="str">"name"</span>: <span class="str">"Keyboard"</span>, <span class="str">"price"</span>: <span class="num">1200</span> }</pre>
+      </div>
+      <div class="callout note">
+        <div class="callout-label">📝 Headers worth knowing by name</div>
+        <code class="inline">Content-Type</code> (the format of <em>this</em> message's body), <code class="inline">Accept</code> (the format the client <em>wants</em> back), <code class="inline">Authorization</code> (credentials, usually a Bearer token), <code class="inline">Cache-Control</code> (caching rules), and <code class="inline">Location</code> (URL of a newly created resource). Interviewers often ask the difference between <code class="inline">Content-Type</code> and <code class="inline">Accept</code> — one describes what you're sending, the other what you'd like to receive.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH3 -->
+  <div class="chapter ch-coral" id="ch3">
+    <div class="chapter-header"><div class="chapter-num">03</div><div><h2>HTTP Methods &amp; Status Codes</h2><div class="ch-sub">Verbs, response codes, and the all-important idempotency</div></div></div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.1 — The methods (verbs)</div>
+      <p>The HTTP method tells the server <em>what kind of action</em> the client wants on a resource. Choosing the right one is the heart of good API design.</p>
+      <table class="comp-table">
+        <tr><th>Method</th><th>Purpose</th><th>Has body?</th><th>Safe?</th><th>Idempotent?</th></tr>
+        <tr><td><code class="inline">GET</code></td><td>Read a resource</td><td>No</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+        <tr><td><code class="inline">POST</code></td><td>Create a new resource</td><td>Yes</td><td>❌ No</td><td>❌ No</td></tr>
+        <tr><td><code class="inline">PUT</code></td><td>Replace a resource fully</td><td>Yes</td><td>❌ No</td><td>✅ Yes</td></tr>
+        <tr><td><code class="inline">PATCH</code></td><td>Update part of a resource</td><td>Yes</td><td>❌ No</td><td>⚠️ Usually not</td></tr>
+        <tr><td><code class="inline">DELETE</code></td><td>Remove a resource</td><td>No</td><td>❌ No</td><td>✅ Yes</td></tr>
+      </table>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Safe vs Idempotent</div>
+        <strong>Safe</strong> = the request doesn't change server state (a pure read). <strong>Idempotent</strong> = making the <em>same</em> request many times has the same effect as making it once. <code class="inline">DELETE /products/42</code> is idempotent: delete it once or ten times, the end state is identical (it's gone). <code class="inline">POST</code> is not: call it three times and you create three products.
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Why this matters in the real world</div>
+        Idempotency is what makes <strong>safe retries</strong> possible. If a network blip means the client never got the response, it can safely retry a <code class="inline">PUT</code> or <code class="inline">DELETE</code> without fear of duplicates. For <code class="inline">POST</code>, you protect against duplicates with an <strong>idempotency key</strong> (a unique header the server uses to detect repeats) — a favourite interview follow-up.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--coral-400);"></div>3.2 — Status codes</div>
+      <p>The status code is a three-digit number that tells the client what happened. The first digit defines the category:</p>
+      <div class="cards-grid">
+        <div class="info-card" style="border-color:var(--blue-200);"><div class="card-icon">ℹ️</div><div class="card-title">1xx — Informational</div><div class="card-body">Rare in APIs. Request received, continuing.</div></div>
+        <div class="info-card" style="border-color:var(--green-200);"><div class="card-icon">✅</div><div class="card-title">2xx — Success</div><div class="card-body"><code class="inline">200</code> OK, <code class="inline">201</code> Created, <code class="inline">204</code> No Content (success, nothing to return).</div></div>
+        <div class="info-card" style="border-color:var(--amber-200);"><div class="card-icon">↪️</div><div class="card-title">3xx — Redirection</div><div class="card-body"><code class="inline">301</code> Moved Permanently, <code class="inline">304</code> Not Modified (use your cache).</div></div>
+        <div class="info-card" style="border-color:var(--coral-200);"><div class="card-icon">🙋</div><div class="card-title">4xx — Client error</div><div class="card-body"><code class="inline">400</code> Bad Request, <code class="inline">401</code> Unauthorized, <code class="inline">403</code> Forbidden, <code class="inline">404</code> Not Found, <code class="inline">409</code> Conflict, <code class="inline">429</code> Too Many Requests.</div></div>
+        <div class="info-card" style="border-color:var(--red-200);"><div class="card-icon">💥</div><div class="card-title">5xx — Server error</div><div class="card-body"><code class="inline">500</code> Internal Server Error, <code class="inline">502</code> Bad Gateway, <code class="inline">503</code> Service Unavailable.</div></div>
+      </div>
+      <div class="callout warning">
+        <div class="callout-label">⚠️ The 401 vs 403 trap</div>
+        <strong>401 Unauthorized</strong> actually means "un<em>authenticated</em>" — we don't know who you are (missing/invalid token). <strong>403 Forbidden</strong> means "we know who you are, but you're not allowed." Mixing these up is a classic interview slip.
+      </div>
+    </div>
+  </div>
+
+  <!-- CH4 -->
+  <div class="chapter ch-amber" id="ch4">
+    <div class="chapter-header"><div class="chapter-num">04</div><div><h2>REST Principles</h2><div class="ch-sub">What makes an API "RESTful" — the constraints that matter</div></div></div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.1 — What REST is</div>
+      <p><strong>REST (Representational State Transfer)</strong> is not a protocol or a library — it's an <em>architectural style</em>, a set of constraints for designing networked APIs, defined by Roy Fielding in 2000. An API that follows these constraints is called <em>RESTful</em>. The core idea is simple and powerful: <strong>model everything as a "resource", give each resource a URL, and act on it using standard HTTP methods.</strong></p>
+      <div class="callout definition">
+        <div class="callout-label">📖 Definition — Resource</div>
+        A <strong>resource</strong> is any "thing" your API exposes — a product, a user, an order. It's identified by a URL (e.g. <code class="inline">/products/42</code>) and represented in a format like JSON. You don't put verbs in the URL; the HTTP method <em>is</em> the verb. So it's <code class="inline">DELETE /products/42</code>, never <code class="inline">/deleteProduct?id=42</code>.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.2 — The key REST constraints</div>
+      <ul class="checklist knows" style="margin-top:6px;">
+        <li><span class="check" style="color:var(--amber-200);">▸</span><span><strong>Client–Server:</strong> the client (UI) and server (data/logic) are separate and evolve independently.</span></li>
+        <li><span class="check" style="color:var(--amber-200);">▸</span><span><strong>Stateless:</strong> every request carries everything the server needs; the server stores no client session between calls. This is what lets you scale to many servers behind a load balancer.</span></li>
+        <li><span class="check" style="color:var(--amber-200);">▸</span><span><strong>Uniform Interface:</strong> resources are addressed by URLs and manipulated with the standard methods — consistency makes APIs predictable.</span></li>
+        <li><span class="check" style="color:var(--amber-200);">▸</span><span><strong>Cacheable:</strong> responses say whether they can be cached, improving performance.</span></li>
+        <li><span class="check" style="color:var(--amber-200);">▸</span><span><strong>Layered System:</strong> the client can't tell if it's talking to the real server or a proxy/load balancer/gateway in between.</span></li>
+      </ul>
+      <div class="callout note">
+        <div class="callout-label">📝 Statelessness — the constraint interviewers probe</div>
+        Because REST is stateless, scaling out is easy: any server can handle any request, since no server holds session data. This is exactly why authentication uses a <strong>JWT sent on every request</strong> rather than a server-side session — it keeps the API stateless and horizontally scalable. Connect these dots out loud and you sound senior.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--amber-200);"></div>4.3 — Richardson Maturity Model (nice to mention)</div>
+      <p>A handy way to describe "how RESTful" an API is, in four levels: <strong>L0</strong> — one URL, everything over POST (basically RPC); <strong>L1</strong> — multiple resource URLs but still mostly POST; <strong>L2</strong> — proper use of HTTP methods and status codes (where most good real-world APIs live); <strong>L3</strong> — adds HATEOAS (responses include links to related actions). You don't need L3 in practice, but naming this model signals depth.</p>
+    </div>
+  </div>
+
+  <!-- CH5 -->
+  <div class="chapter ch-blue" id="ch5">
+    <div class="chapter-header"><div class="chapter-num">05</div><div><h2>Designing RESTful APIs</h2><div class="ch-sub">Practical rules you'll apply in every project and defend in interviews</div></div></div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.1 — Resource naming</div>
+      <p>Good URLs are nouns, plural, lowercase, and hierarchical. Let the method express the action.</p>
+      <table class="comp-table">
+        <tr><th>❌ Avoid</th><th>✅ Prefer</th><th>Why</th></tr>
+        <tr><td><code class="inline">GET /getAllProducts</code></td><td><code class="inline">GET /products</code></td><td>The verb is the HTTP method, not the URL.</td></tr>
+        <tr><td><code class="inline">POST /createProduct</code></td><td><code class="inline">POST /products</code></td><td>POST to the collection means "create".</td></tr>
+        <tr><td><code class="inline">GET /product/42</code></td><td><code class="inline">GET /products/42</code></td><td>Use plural collections consistently.</td></tr>
+        <tr><td><code class="inline">GET /products/42/getReviews</code></td><td><code class="inline">GET /products/42/reviews</code></td><td>Nest sub-resources by hierarchy.</td></tr>
+      </table>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.2 — Filtering, sorting, pagination</div>
+      <p>These belong in the <strong>query string</strong>, not the path, because they shape a collection rather than identify a resource:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang-tag">HTTP</span></div>
+        <pre><span class="meth">GET</span> /products?category=electronics&amp;sort=price&amp;order=desc&amp;page=2&amp;pageSize=20</pre>
+      </div>
+      <div class="callout tip">
+        <div class="callout-label">💡 Always paginate collections</div>
+        Returning every row of a large table in one response is a real-world performance disaster (and a red flag in interviews). Default to a sensible <code class="inline">pageSize</code>, return the total count or paging metadata, and never let a client request "everything".
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.3 — Versioning</div>
+      <p>APIs evolve, but existing clients must not break. So you version. The two common approaches:</p>
+      <div class="method-cards" style="grid-template-columns:1fr 1fr;">
+        <div class="method-card" style="border-color:var(--blue-200);"><div class="method-card-head" style="background:var(--blue-50);color:var(--blue-800);">URL versioning</div><div class="method-card-body"><code class="inline">/api/v1/products</code><ul><li>Simple, visible, easy to route.</li><li>Most common in practice.</li></ul></div></div>
+        <div class="method-card" style="border-color:var(--teal-200);"><div class="method-card-head" style="background:var(--teal-50);color:var(--teal-800);">Header versioning</div><div class="method-card-body"><code class="inline">api-version: 1.0</code><ul><li>Cleaner URLs.</li><li>Harder to test/discover.</li></ul></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><div class="bar" style="background:var(--blue-400);"></div>5.4 — Use the right status codes &amp; consistent errors</div>
+      <p>Return <code class="inline">201 Created</code> with a <code class="inline">Location</code> header on creation, <code class="inline">204 No Content</code> on a successful delete, <code class="inline">400</code> for validation errors, <code class="inline">404</code> when a resource doesn't exist, <code class="inline">409</code> for conflicts. ASP.NET Core ships a standard error format called <strong>ProblemDetails</strong> (RFC 7807) — use it so every error in your API looks the same.</p>
+    </div>
+  </div>
+
+  <!-- CH6 -->
+  <div class="chapter ch-green" id="ch6">
+    <div class="chapter-header"><div class="chapter-num">06</div><div><h2>Interview Preparation</h2><div class="ch-sub">Questions and model answers at the 4 YOE level</div></div></div>
+
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q1</span>What does it mean that HTTP is stateless, and why does it matter?</div><div class="interview-a"><span class="a-label">A</span>Stateless means the server keeps no memory of a client between requests — each request must carry all the context it needs. It matters because it makes APIs horizontally scalable: any server behind a load balancer can handle any request, since none of them hold session state. It's also why authentication sends a token on every request instead of relying on a server-side session.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q2</span>What's the difference between PUT and PATCH?</div><div class="interview-a"><span class="a-label">A</span>PUT replaces the entire resource with the payload you send — omit a field and it's effectively cleared. PATCH applies a partial update, changing only the fields you provide. PUT is idempotent; PATCH usually isn't, depending on the operation.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q3</span>Explain idempotency and give an example.</div><div class="interview-a"><span class="a-label">A</span>An operation is idempotent if performing it multiple times has the same effect as performing it once. <code class="inline">DELETE /orders/5</code> is idempotent — after the first call the order is gone, and repeats leave it gone. <code class="inline">POST /orders</code> is not — three calls create three orders. Idempotency lets clients safely retry after network failures; for POST you add an idempotency key to dedupe.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q4</span>401 vs 403?</div><div class="interview-a"><span class="a-label">A</span>401 Unauthorized means you're not authenticated — we don't know who you are, usually a missing or invalid token. 403 Forbidden means you're authenticated but lack permission for this resource.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q5</span>Is REST the same as HTTP?</div><div class="interview-a"><span class="a-label">A</span>No. HTTP is the transport protocol. REST is an architectural style — a set of constraints (stateless, uniform interface, resources via URLs, standard methods) for designing APIs. REST is almost always implemented over HTTP, but they're different layers: you can violate REST while still using HTTP perfectly.</div></div>
+    <div class="interview-block"><div class="interview-q"><span class="q-label">Q6</span>How do you handle API versioning and why?</div><div class="interview-a"><span class="a-label">A</span>Because existing clients must keep working when the API changes, you version it — commonly via the URL (<code class="inline">/api/v1/...</code>) for visibility and easy routing, or via a header for cleaner URLs. You introduce a new version only for breaking changes; additive, backward-compatible changes don't need one.</div></div>
+  </div>
+
+  <!-- CH7 -->
+  <div class="chapter ch-blue" id="ch7">
+    <div class="chapter-header"><div class="chapter-num">07</div><div><h2>What a 4 YOE Engineer Must Know</h2><div class="ch-sub">Master vs. skip</div></div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--teal-800);margin-bottom:10px;padding:8px 12px;background:var(--teal-50);border-radius:8px;">✅ Must Know</div>
+        <ul class="checklist knows">
+          <li><span class="check">✓</span><span>Request/response anatomy and the key headers</span></li>
+          <li><span class="check">✓</span><span>All five methods + safe/idempotent properties</span></li>
+          <li><span class="check">✓</span><span>The common status codes and 401 vs 403</span></li>
+          <li><span class="check">✓</span><span>REST constraints, especially statelessness, and why it enables scaling</span></li>
+          <li><span class="check">✓</span><span>Resource naming, pagination/filtering/sorting, versioning</span></li>
+          <li><span class="check">✓</span><span>Idempotency keys for safe POST retries</span></li>
+        </ul>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--gray-800);margin-bottom:10px;padding:8px 12px;background:var(--gray-50);border-radius:8px;">⏭️ Can Skip for Now</div>
+        <ul class="checklist skip">
+          <li><span class="check">○</span><span>HATEOAS / Richardson Level 3 (know it exists, skip implementing)</span></li>
+          <li><span class="check">○</span><span>HTTP/2 &amp; HTTP/3 internals (multiplexing, QUIC) — conceptual awareness only</span></li>
+          <li><span class="check">○</span><span>Exhaustive list of every status code and header</span></li>
+          <li><span class="check">○</span><span>Low-level TLS handshake details</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="revision-box">
+    <h3>⚡ Quick Revision — Paste in Your Notes</h3>
+    <div class="rev-grid">
+      <div class="rev-item"><strong>HTTP:</strong> stateless, request→response, text-based. Server never initiates; client always asks first.</div>
+      <div class="rev-item"><strong>Request parts:</strong> method + path + version, headers, blank line, body. <code>Content-Type</code> = what I send; <code>Accept</code> = what I want back.</div>
+      <div class="rev-item"><strong>Methods:</strong> GET (read, safe+idempotent), POST (create, neither), PUT (replace, idempotent), PATCH (partial), DELETE (idempotent).</div>
+      <div class="rev-item"><strong>Status:</strong> 2xx ok, 3xx redirect, 4xx client error, 5xx server error. 401 = unauthenticated, 403 = forbidden.</div>
+      <div class="rev-item"><strong>Idempotent:</strong> same request N times = same effect as once → enables safe retries. POST dedupe via idempotency key.</div>
+      <div class="rev-item"><strong>REST:</strong> style, not protocol. Resources via URLs (plural nouns), method = verb, stateless, uniform interface, cacheable.</div>
+      <div class="rev-item"><strong>API design:</strong> nouns not verbs; filter/sort/page in query string; always paginate; version with <code>/api/v1</code>.</div>
+      <div class="rev-item"><strong>Errors:</strong> use correct codes + ProblemDetails (RFC 7807) for a consistent error shape.</div>
+    </div>
+  </div>
+
+  </div><!-- end page-body -->
+</main>
+
+<script>
+  const navItems = document.querySelectorAll('.nav-item');
+  const chapters = document.querySelectorAll('.chapter');
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => item.classList.toggle('active', item.getAttribute('href') === '#' + id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  chapters.forEach(ch => observer.observe(ch));
+</script>
+</body>
+</html>
